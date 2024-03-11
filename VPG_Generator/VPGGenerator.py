@@ -2,7 +2,7 @@ import numpy as np
 import cv2
 import dlib
 
-from VPGGenerator.IVPGGenerator import IVPGGenerator
+from VPG_Generator.IVPGGenerator import IVPGGenerator
 
 
 class VPGGenerator(IVPGGenerator):
@@ -80,7 +80,13 @@ class VPGGenerator(IVPGGenerator):
         hor = [4, 5, 6, 7, 8, 9, 10, 11]    # Точки на подбородке
 
         channels = cv2.split(face_frame)
+        channels = np.array(channels, np.float64)
+        channels[1] = channels[1] / np.max(channels[1])
+        channels[0] = channels[0] / np.max(channels[0])
+        channels[2] = channels[2] / np.max(channels[2])
+
         one_frame_vpg = np.zeros(shape=(3, len(ver) - 1, len(hor) - 1))
+        one_frame_count = 0
 
         try:
             for i in range(len(hor) - 1):
@@ -93,13 +99,14 @@ class VPGGenerator(IVPGGenerator):
 
                     if i != 3 or i != 4 and j != 2:
                         submats = np.asarray([x[hl_y:lr_y, hl_x:lr_x] for x in channels])
+                        one_frame_count += submats.shape[0] * submats.shape[1]
 
                         for k in range(len(channels)):
-                            one_frame_vpg[k][len(ver) - j - 2][i] = np.mean(submats[k])
+                            one_frame_vpg[k][len(ver) - j - 2][i] = np.sum(submats[k])
         except:
             return np.array([])
 
-        return one_frame_vpg
+        return one_frame_vpg / one_frame_count
 
     @staticmethod
     def _get_RGB(one_frame_vpg: np.ndarray) -> tuple:
@@ -108,7 +115,7 @@ class VPGGenerator(IVPGGenerator):
         :param one_frame_vpg: - Сигналы в областях интереса
         :return: R, G, B - Сигналы R G B
         """
-        return np.mean(one_frame_vpg[2]), np.mean(one_frame_vpg[1]), np.mean(one_frame_vpg[0])
+        return np.sum(one_frame_vpg[2]), np.sum(one_frame_vpg[1]), np.sum(one_frame_vpg[0])
 
     @staticmethod
     def _vpg_func(r: float, g: float, b: float) -> float:

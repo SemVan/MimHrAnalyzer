@@ -4,7 +4,7 @@ import numpy as np
 import time
 import matplotlib.pyplot as plt
 
-from VPGGenerator import VPGGenerator
+from VPG_Generator.VPGGenerator import VPGGenerator
 
 
 PATH_DATA = 'Data'
@@ -129,9 +129,8 @@ def test_get_report(vpg_generator, frames: list):
 
 
 def test(vpg_generator):
-    for file_name in os.listdir(PATH_DATA):
+    for file_name in os.listdir('Data'):
         file_path = os.path.join(PATH_DATA, file_name)
-        print(file_name)
 
         frames, fps = file_reader(file_path, visualize=False)
         print(f'fps: {fps}')
@@ -141,13 +140,16 @@ def test(vpg_generator):
 #########################################################################################################
         #Тестируем методы
         print('Тестирование:')
-        test_face_detector(vpg_generator, frames)
-        test_get_landmarks(vpg_generator, frames)
+        #test_face_detector(vpg_generator, frames)
+        #test_get_landmarks(vpg_generator, frames)
         #test_get_segmented_frame(vpg_generator, frames)
-        vpg = test_get_report(vpg_generator, frames)
+        #vpg = test_get_report(vpg_generator, frames)
 
-        file_path = file_path.split('.')[0] + '.npy'
-        np.save(file_path, vpg)
+        #print(frames[0])
+        vpg_generator.get_vpg_discret(frames[54])
+
+        #file_path = file_path.split('.')[0] + '.npy'
+        #np.save(file_path, vpg)
 
 
 if __name__ == '__main__':

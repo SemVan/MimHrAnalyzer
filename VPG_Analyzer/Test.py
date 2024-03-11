@@ -2,7 +2,7 @@ import os
 import numpy as np
 import matplotlib.pyplot as plt
 
-from VPGAnalyzer import VPGAnalyzer
+from VPG_Analyzer.VPGAnalyzer import VPGAnalyzer
 
 
 PATH_DATA = 'Data'

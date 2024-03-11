@@ -2,11 +2,13 @@ import multiprocessing as mp
 import matplotlib.pyplot as plt
 import cv2
 import numpy as np
-import time
+import math
 import json
+import os
+import time
 
-from VPGGenerator.VPGGenerator import VPGGenerator
-from VPGAnalyzer.VPGAnalyzer import VPGAnalyzer
+from VPG_Generator.VPGGenerator import VPGGenerator
+from VPG_Analyzer.VPGAnalyzer import VPGAnalyzer
 
 
 class App:
@@ -16,7 +18,6 @@ class App:
         self.__frame_handler_process = mp.Process(target=self._frame_handler, args=(self.__queue,))
         self.vpg = []
         self.__vpg_filt = []
-        self.frames = []
         self.fps = 0
 
     @staticmethod
@@ -49,9 +50,18 @@ class App:
         self.__frame_handler_process.start()
 
         cap = cv2.VideoCapture(0)
+        cap.set(cv2.CAP_PROP_AUTO_EXPOSURE, 1)  # auto mode
+        #cap.set(cv2.CAP_PROP_AUTO_EXPOSURE, 0)  # manual mode
+        #cap.set(cv2.CAP_PROP_EXPOSURE, -5) # примерно 0.0333 мс
         self.fps = cap.get(cv2.CAP_PROP_FPS)
 
+        frame_width = int(cap.get(3))
+        frame_height = int(cap.get(4))
+        path = os.path.join(self.__path, "video.avi")
+        video = cv2.VideoWriter(path, cv2.VideoWriter_fourcc('M', 'J', 'P', 'G'), self.fps, (frame_width, frame_height))
+
         while (True):
+            start = time.time()
             ret, frame = cap.read()
 
             # Если кадр не считался выйти из цикла
@@ -62,13 +72,16 @@ class App:
 
             cv2.imshow('Video', frame)
             self.__queue.put(frame)
-            self.frames.append(frame)
+            video.write(frame)
+            #print(cap.get(cv2.CAP_PROP_AUTO_EXPOSURE))
 
             # Если нажата кнопка закончить регистрацию
             if cv2.waitKey(1) & 0xFF == ord(' '):
                 cap.release()
+                video.release()
                 cv2.destroyAllWindows()
                 break
+            #print(time.time() - start)
 
         self.__queue.put(None)
         self.__frame_handler_process.join()
@@ -91,17 +104,21 @@ class App:
         # Нормолизуем сигнал
         self.vpg = (self.vpg - np.mean(self.vpg)) / np.std(self.vpg)
 
-        plt.plot(self.vpg)
+        plt.plot(self.vpg, label='ВПГ после нормолизации')
 
         # Фильтрация
         self.__vpg_filt = vpg_analyzer.filt(self.vpg, self.fps)
 
-        plt.plot(self.__vpg_filt)
-        plt.show()
-
         # Расчёт ЧСС
         print(f'Длинна сигнала: {len(self.vpg)}')
         print(f'ЧСС: {vpg_analyzer.get_report(self.__vpg_filt, self.fps)}')
+
+        plt.plot(self.__vpg_filt, label='ВПГ фильтрованный')
+        plt.grid()
+        plt.legend()
+        path = os.path.join(self.__path, "vpg.png")
+        plt.savefig(path, dpi=512)
+        plt.show()
 
     def start(self):
         self._registrate()
