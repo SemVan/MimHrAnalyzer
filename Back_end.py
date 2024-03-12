@@ -25,7 +25,7 @@ class App:
         """
         Метод параллельной обработки кадров
         :param queue: Очерь, в которую будут складываться кадры
-        :return:
+        :return: None
         """
         vpg_generator = VPGGenerator()
         vpg = []
@@ -47,6 +47,10 @@ class App:
             json.dump(vpg, file)
 
     def _registrate(self):
+        """
+        Метод регистрации видео
+        :return: None
+        """
         self.__frame_handler_process.start()
 
         cap = cv2.VideoCapture(0)
@@ -61,7 +65,7 @@ class App:
         video = cv2.VideoWriter(path, cv2.VideoWriter_fourcc('M', 'J', 'P', 'G'), self.fps, (frame_width, frame_height))
 
         while (True):
-            start = time.time()
+            #start = time.time()
             ret, frame = cap.read()
 
             # Если кадр не считался выйти из цикла
@@ -91,6 +95,10 @@ class App:
             self.vpg = json.load(file)
 
     def _analyzer(self):
+        """
+        Метод постобработки
+        :return: None
+        """
         vpg_analyzer = VPGAnalyzer()
 
         # Избавление от кадров без лица
