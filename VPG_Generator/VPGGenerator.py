@@ -137,6 +137,16 @@ class VPGGenerator(IVPGGenerator):
             return None
         return self._vpg_func(r, g, b)
 
+    def get_vpg_discret_without_face(self, frame: np.ndarray) -> float:
+        """
+        Метод расчёта одного отсчёта ВПГ
+        :param frame: Кадр
+        :return: отсчёт ВПГ
+        """
+        channels = np.array(cv2.split(frame), np.float64)
+        r, g, b = self._get_RGB(channels)
+        return self._vpg_func(r, g, b)
+
     def get_report(self, frames: list) -> list:
         """
         Метод формирования ВПГ сигнала
