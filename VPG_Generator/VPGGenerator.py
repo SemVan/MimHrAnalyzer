@@ -81,11 +81,11 @@ class VPGGenerator(IVPGGenerator):
 
         channels = cv2.split(face_frame)
         channels = np.array(channels, np.float64)
-        channels[1] = channels[1] / np.max(channels[1])
+        '''channels[1] = channels[1] / np.max(channels[1])
         channels[0] = channels[0] / np.max(channels[0])
-        channels[2] = channels[2] / np.max(channels[2])
+        channels[2] = channels[2] / np.max(channels[2])'''
 
-        one_frame_vpg = np.zeros(shape=(3, len(ver) - 1, len(hor) - 1))
+        one_frame_vpg = np.zeros(shape=(3, len(ver) - 1, len(hor) - 1), dtype=np.float64)
         one_frame_count = 0
 
         try:
@@ -140,6 +140,7 @@ class VPGGenerator(IVPGGenerator):
             if len(one_frame_vpg) != 3:
                 return None
             r, g, b = self._get_RGB(one_frame_vpg)
+            #r, g, b = self._get_RGB(np.array(cv2.split(frame), np.float64))
         except:
             return None
         return self._vpg_func(r, g, b)
