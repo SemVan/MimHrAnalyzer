@@ -40,7 +40,8 @@ class App:
             if frame is None:
                 break
 
-            value = vpg_generator.get_vpg_discret(frame)
+            #value = vpg_generator.get_vpg_discret(frame)
+            value = vpg_generator.get_vpg_discret_without_face(frame)
             vpg.append(value)
 
         with open('vpg.json', 'w') as file:
@@ -110,7 +111,7 @@ class App:
                     self.vpg[i] = self.vpg[i - 1]
 
         # Нормолизуем сигнал
-        self.vpg = (self.vpg - np.mean(self.vpg)) / np.std(self.vpg)
+        #self.vpg = (self.vpg - np.mean(self.vpg)) / np.std(self.vpg)
 
         plt.plot(self.vpg, label='ВПГ после нормолизации')
 
@@ -121,7 +122,7 @@ class App:
         print(f'Длинна сигнала: {len(self.vpg)}')
         print(f'ЧСС: {vpg_analyzer.get_report(self.__vpg_filt, self.fps)}')
 
-        plt.plot(self.__vpg_filt, label='ВПГ фильтрованный')
+        #plt.plot(self.__vpg_filt, label='ВПГ фильтрованный')
         plt.grid()
         plt.legend()
         path = os.path.join(self.__path, "vpg.png")
