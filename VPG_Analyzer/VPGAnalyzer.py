@@ -2,7 +2,7 @@ import numpy as np
 from scipy.signal import butter, sosfilt
 from numpy.fft import rfft, rfftfreq
 
-from VPGAnalyzer.IVPGAnalyzer import IVPGAnalyzer
+from VPG_Analyzer.IVPGAnalyzer import IVPGAnalyzer
 
 
 class VPGAnalyzer(IVPGAnalyzer):

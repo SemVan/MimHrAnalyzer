@@ -2,7 +2,7 @@ import cv2
 import multiprocessing
 import matplotlib.pyplot as plt
 
-from VPGGenerator import VPGGenerator
+from VPG_Generator.VPGGenerator import VPGGenerator
 
 
 def frame_handler(queue):
