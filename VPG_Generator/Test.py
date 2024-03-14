@@ -72,10 +72,15 @@ def test_get_landmarks(vpg_generator, frames: list):
     :param frames: - Список кадров
     :return: None
     """
-    frame_width = 640
+
+    '''frame_width = 640
     frame_height = 480
     path = os.path.join("video.avi")
-    video = cv2.VideoWriter(path, cv2.VideoWriter_fourcc('M', 'J', 'P', 'G'), 30, (frame_width, frame_height))
+    video = cv2.VideoWriter(path, cv2.VideoWriter_fourcc('M', 'J', 'P', 'G'), 30, (frame_width, frame_height))'''
+    p = [4, 5, 6, 7, 8, 9, 10, 11, 50, 33, 30, 29]
+    graph = dict()
+    for i in p:
+        graph[i] = [[],[]]
 
     start = time.time()
     for frame in frames:
@@ -83,12 +88,11 @@ def test_get_landmarks(vpg_generator, frames: list):
         face_frame_gray = cv2.cvtColor(face_frame, cv2.COLOR_BGR2GRAY)
         points = vpg_generator.get_landmarks(face_frame_gray, [])
 
-        ver = [50, 33, 30, 29]
-        hor = [4, 5, 6, 7, 8, 9, 10, 11]
-
-        for i, point in enumerate(np.array(points)):
+        for i, point in enumerate(np.array(points)[p]):
             point[0] += rectangle[0]
             point[1] += rectangle[1]
+            graph[p[i]][0].append(point[0])
+            graph[p[i]][1].append(point[1])
             frame = cv2.circle(frame, point,
                                radius=2,
                                color=(0, 255, 0),
@@ -97,11 +101,77 @@ def test_get_landmarks(vpg_generator, frames: list):
                                 0.5, (255, 0, 0), 1, cv2.LINE_AA)
 
         cv2.imshow('Video', frame)
-        video.write(frame)
+        #video.write(frame)
         if cv2.waitKey(1) & 0xFF == ord(' '):
             cv2.destroyAllWindows()
             break
-    video.release()
+
+    xx = []
+    for k in graph.keys():
+        x = np.array(graph[k][0])
+        x -= x[0]
+        plt.plot(x, label=str(k))
+        xx.append(x)
+    xx = np.array(xx)
+    print(xx.shape)
+    plt.legend()
+    plt.show()
+
+    mx = []
+    for i in range(len(xx[0])):
+        mx.append(np.mean(xx[:, i]))
+    plt.plot(mx)
+    plt.show()
+
+    yy = []
+    for k in graph.keys():
+        y = np.array(graph[k][1])
+        y -= y[0]
+        plt.plot(y, label=str(k))
+        yy.append(y)
+    yy = np.array(yy)
+    print(yy.shape)
+    plt.legend()
+    plt.show()
+
+    my = []
+    for i in range(len(yy[0])):
+        my.append(np.mean(yy[:, i]))
+    plt.plot(my)
+    plt.show()
+
+    vpg = vpg_generator.get_report(frames)
+    vpg = np.array(vpg)
+    vpg = (vpg - np.mean(vpg)) / np.std(vpg)
+    plt.plot(vpg, label='ВПГ')
+
+    mx = np.array(mx)
+    mx = (mx - np.mean(mx)) / np.std(mx)
+    plt.plot(mx, label='кадры')
+    plt.legend()
+    plt.show()
+    np.save("vpg.npy", vpg)
+    np.save("mx.npy", vpg)
+
+    vpg = vpg_generator.get_report(frames)
+    vpg = np.array(vpg)
+    vpg = (vpg - np.mean(vpg)) / np.std(vpg)
+    plt.plot(vpg, label='ВПГ')
+
+    my = np.array(my)
+    my = (my - np.mean(my)) / np.std(my)
+    plt.plot(my, label='кадры')
+    plt.legend()
+    plt.show()
+    np.save("my.npy", vpg)
+
+    '''for i in range(len(graph)):
+        x = np.array(graph[p[i]][1])
+        x -= x[0]
+        plt.plot(x, label=str(p[i]))
+    plt.legend()
+    plt.show()'''
+    #video.release()
     print(f'Время test_get_landmarks: {time.time() - start}')
 
 
