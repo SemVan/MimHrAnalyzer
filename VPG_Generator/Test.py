@@ -151,7 +151,7 @@ def test_get_landmarks(vpg_generator, frames: list):
     plt.legend()
     plt.show()
     np.save("vpg.npy", vpg)
-    np.save("mx.npy", vpg)
+    np.save("mx.npy", mx)
 
     vpg = vpg_generator.get_report(frames)
     vpg = np.array(vpg)
@@ -163,7 +163,7 @@ def test_get_landmarks(vpg_generator, frames: list):
     plt.plot(my, label='кадры')
     plt.legend()
     plt.show()
-    np.save("my.npy", vpg)
+    np.save("my.npy", my)
 
     '''for i in range(len(graph)):
         x = np.array(graph[p[i]][1])
