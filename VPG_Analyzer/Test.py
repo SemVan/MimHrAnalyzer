@@ -1,5 +1,6 @@
 import os
 import numpy as np
+import json
 import matplotlib.pyplot as plt
 
 from VPG_Analyzer.VPGAnalyzer import VPGAnalyzer
@@ -16,25 +17,37 @@ def test():
 
         vpg_analyzer = VPGAnalyzer()
 
-        vpg = np.load(file_path, allow_pickle=True)[30:]
+        with open(file_path, 'r') as file:
+            vpg = json.load(file)
+            # Избавление от кадров без лица
+            for i in range(len(vpg)):
+                if vpg[i] is None:
+                    if i == 0:
+                        vpg[i] = 0
+                    else:
+                        vpg[i] = vpg[i - 1]
+        vpg = np.array(vpg)
+
+        f, spec = vpg_analyzer.get_spec(vpg, FPS)
+        plt.plot(f[1:], np.abs(spec)[1:])
+        plt.grid()
+        plt.show()
+
         t = np.array(list(range(len(vpg)))) * (1 / FPS)
         vpg = (vpg - np.mean(vpg)) / np.std(vpg)
+
+        plt.plot(t, vpg)
+        vpg = vpg_analyzer.filt(vpg, FPS)
         plt.plot(t, vpg)
 
-        #print(len(vpg))
-        vpg1 = vpg_analyzer.butter_bandpass_filter(vpg, 0.3, 2, FPS, order=5)
-        #print(len(vpg))
-        win_size = 6
-        vpg1 = vpg_analyzer.smooth(vpg1, win_size)
-        #print(len(vpg))
-        plt.plot(t, vpg1)
+        peaks = vpg_analyzer.find_peaks(vpg)
+        plt.plot(t[peaks], vpg[peaks], "x")
         plt.show()
 
-        f, spec = vpg_analyzer.get_spec(vpg1, FPS)
-        plt.plot(f, np.abs(spec))
-        plt.show()
-
-        print(f'ЧСС: {vpg_analyzer.get_report(vpg, FPS)}')
+        print(f'SDANN: {vpg_analyzer.get_sdann(vpg, FPS)}')
+        print(f'RMSSD: {vpg_analyzer.get_rmssd(vpg, FPS)}')
+        print(f'NN50: {vpg_analyzer.get_nn50(vpg, FPS)}')
+        print(f'ЧСС: {vpg_analyzer.get_hr_peak(vpg, FPS)}')
 
 if __name__ == '__main__':
     test()

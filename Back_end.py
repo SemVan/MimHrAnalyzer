@@ -120,7 +120,7 @@ class App:
 
         # Расчёт ЧСС
         print(f'Длинна сигнала: {len(self.vpg)}')
-        print(f'ЧСС: {vpg_analyzer.get_report(self.__vpg_filt, self.fps)}')
+        print(f'ЧСС: {vpg_analyzer.get_hr_spec(self.__vpg_filt, self.fps)}')
 
         #plt.plot(self.__vpg_filt, label='ВПГ фильтрованный')
         plt.grid()

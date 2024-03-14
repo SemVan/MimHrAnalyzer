@@ -22,6 +22,7 @@ def file_reader(file_path: str, visualize=True) -> tuple:
 
     # Считываем файл
     cap = cv2.VideoCapture(file_path)
+    print(int(cap.get(3)), int(cap.get(4)))
     fps = cap.get(cv2.CAP_PROP_FPS)
     while (True):
         ret, frame = cap.read()
@@ -71,6 +72,11 @@ def test_get_landmarks(vpg_generator, frames: list):
     :param frames: - Список кадров
     :return: None
     """
+    frame_width = 640
+    frame_height = 480
+    path = os.path.join("video.avi")
+    video = cv2.VideoWriter(path, cv2.VideoWriter_fourcc('M', 'J', 'P', 'G'), 30, (frame_width, frame_height))
+
     start = time.time()
     for frame in frames:
         face_frame, rectangle = vpg_generator.detect_face(frame)
@@ -91,9 +97,11 @@ def test_get_landmarks(vpg_generator, frames: list):
                                 0.5, (255, 0, 0), 1, cv2.LINE_AA)
 
         cv2.imshow('Video', frame)
+        video.write(frame)
         if cv2.waitKey(1) & 0xFF == ord(' '):
             cv2.destroyAllWindows()
             break
+    video.release()
     print(f'Время test_get_landmarks: {time.time() - start}')
 
 
@@ -141,12 +149,12 @@ def test(vpg_generator):
         #Тестируем методы
         print('Тестирование:')
         #test_face_detector(vpg_generator, frames)
-        #test_get_landmarks(vpg_generator, frames)
+        test_get_landmarks(vpg_generator, frames)
         #test_get_segmented_frame(vpg_generator, frames)
         #vpg = test_get_report(vpg_generator, frames)
 
         #print(frames[0])
-        vpg_generator.get_vpg_discret(frames[54])
+        #vpg_generator.get_vpg_discret(frames[54])
 
         #file_path = file_path.split('.')[0] + '.npy'
         #np.save(file_path, vpg)
