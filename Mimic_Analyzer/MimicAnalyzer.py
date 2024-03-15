@@ -360,7 +360,7 @@ class MimicAnalyzer(IMimicAnalyzer):
             None,
             {'feature': pred},
         )[0]
-        pred_au_intensity = np.squeeze(pred_au_intensity, axis=0)
+        pred_au_intensity = np.squeeze(pred_au_intensity, axis=0).astype(float).tolist()
 
         # AU presence
         pred_au_presence = self.ort_session_au_presence.run(
@@ -368,19 +368,19 @@ class MimicAnalyzer(IMimicAnalyzer):
             {'feature': pred},
         )[0]
         pred_au_presence = np.squeeze(pred_au_presence, axis=0)
-        pred_au_presence = pred_au_presence > 0.5
+        pred_au_presence = (pred_au_presence > 0.5).astype(bool).tolist()
 
         # expression
         pred_expression = self.ort_session_expression.run(
             None,
             {'image': aligned_image},
         )[0]
-        pred_expression = np.squeeze(pred_expression, axis=0)
+        pred_expression = np.squeeze(pred_expression, axis=0).astype(float).tolist()
 
         pred_expression_max = np.max(pred_expression)
-        pred_expression = [np.exp(el - pred_expression_max) for el in pred_expression]
-        pred_expression_sum = np.sum(pred_expression)
-        pred_expression_normalized = np.array([el / pred_expression_sum for el in pred_expression])
+        pred_expression_exp = [np.exp(el - pred_expression_max) for el in pred_expression]
+        pred_expression_sum = np.sum(pred_expression_exp)
+        pred_expression_normalized = [el / pred_expression_sum for el in pred_expression_exp]
 
         mimic_results = {}
         mimic_results['pred_au_intensity'] = pred_au_intensity
@@ -401,9 +401,9 @@ class MimicAnalyzer(IMimicAnalyzer):
         annotated_frame, landmarks = self.detect_landmarks(frame)
         if landmarks is None:
             result = dict()
-            result['pred_au_intensity'] = np.array([0] * 12)
-            result['pred_au_presence'] = np.array([False] * 12)
-            result['pred_expression'] = np.array([0] * 8)
+            result['pred_au_intensity'] = [0] * 12
+            result['pred_au_presence'] = [False] * 12
+            result['pred_expression'] = [0] * 8
         else:
             aligned_face_image = self.image_align(frame, landmarks)
             result = self.predict(aligned_face_image)
