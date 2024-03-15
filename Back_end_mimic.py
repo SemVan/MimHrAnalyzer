@@ -71,11 +71,10 @@ class App:
         # из-за бесконечного ожидания завершения дочернего процесса
         # (который виснет по причине использования onnxruntime-сессий InferenceSession)
         while True:
+            time.sleep(1)
             if self.__queue.qsize() == 1:
-                self.__frame_handler_process.join(timeout=1)
+                self.__frame_handler_process.join(timeout=2)
                 break
-            else:
-                time.sleep(1)
 
         # Получение результатов распознавания
         self.__results = self.__queue.get()
