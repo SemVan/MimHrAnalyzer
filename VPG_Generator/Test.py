@@ -73,10 +73,10 @@ def test_get_landmarks(vpg_generator, frames: list):
     :return: None
     """
 
-    '''frame_width = 640
+    frame_width = 640
     frame_height = 480
     path = os.path.join("video.avi")
-    video = cv2.VideoWriter(path, cv2.VideoWriter_fourcc('M', 'J', 'P', 'G'), 30, (frame_width, frame_height))'''
+    video = cv2.VideoWriter(path, cv2.VideoWriter_fourcc('M', 'J', 'P', 'G'), 30, (frame_width, frame_height))
     p = [4, 5, 6, 7, 8, 9, 10, 11, 50, 33, 30, 29]
     graph = dict()
     for i in p:
@@ -84,13 +84,15 @@ def test_get_landmarks(vpg_generator, frames: list):
 
     start = time.time()
     for frame in frames:
+        frame = cv2.GaussianBlur(frame, (3, 3), 5)
+        frame = cv2.medianBlur(frame, 3)
+
         face_frame, rectangle = vpg_generator.detect_face(frame)
-        face_frame_gray = cv2.cvtColor(face_frame, cv2.COLOR_BGR2GRAY)
-        points = vpg_generator.get_landmarks(face_frame_gray, [])
+        points = vpg_generator.get_landmarks(frame, rectangle)
 
         for i, point in enumerate(np.array(points)[p]):
-            point[0] += rectangle[0]
-            point[1] += rectangle[1]
+            #point[0] += rectangle[0]
+            #point[1] += rectangle[1]
             graph[p[i]][0].append(point[0])
             graph[p[i]][1].append(point[1])
             frame = cv2.circle(frame, point,
@@ -101,8 +103,9 @@ def test_get_landmarks(vpg_generator, frames: list):
                                 0.5, (255, 0, 0), 1, cv2.LINE_AA)
 
         cv2.imshow('Video', frame)
-        #video.write(frame)
+        video.write(frame)
         if cv2.waitKey(1) & 0xFF == ord(' '):
+            video.release()
             cv2.destroyAllWindows()
             break
 

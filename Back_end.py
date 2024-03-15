@@ -111,7 +111,7 @@ class App:
                     self.vpg[i] = self.vpg[i - 1]
 
         # Нормолизуем сигнал
-        #self.vpg = (self.vpg - np.mean(self.vpg)) / np.std(self.vpg)
+        self.vpg = (self.vpg - np.mean(self.vpg)) / np.std(self.vpg)
 
         plt.plot(self.vpg, label='ВПГ после нормолизации')
 
@@ -120,9 +120,9 @@ class App:
 
         # Расчёт ЧСС
         print(f'Длинна сигнала: {len(self.vpg)}')
-        print(f'ЧСС: {vpg_analyzer.get_hr_spec(self.__vpg_filt, self.fps)}')
+        print(f'ЧСС: {vpg_analyzer.get_hr_peak(self.__vpg_filt, self.fps)}')
 
-        #plt.plot(self.__vpg_filt, label='ВПГ фильтрованный')
+        plt.plot(self.__vpg_filt, label='ВПГ фильтрованный')
         plt.grid()
         plt.legend()
         path = os.path.join(self.__path, "vpg.png")
