@@ -3,7 +3,7 @@ import time
 
 import cv2
 
-from MimicAnalyzer.MimicAnalyzer import MimicAnalyzer
+from Mimic_Analyzer.MimicAnalyzer import MimicAnalyzer
 
 
 class App:

@@ -4,7 +4,7 @@ import numpy as np
 import onnxruntime as ort
 import pandas as pd
 
-from MimicAnalyzer.IMimicAnalyzer import IMimicAnalyzer
+from Mimic_Analyzer.IMimicAnalyzer import IMimicAnalyzer
 
 
 class MimicAnalyzer(IMimicAnalyzer):
