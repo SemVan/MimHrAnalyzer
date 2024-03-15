@@ -1,5 +1,5 @@
 import numpy as np
-from scipy.signal import butter, sosfilt
+from scipy.signal import butter, sosfilt, medfilt
 from numpy.fft import rfft, rfftfreq
 from scipy.signal import find_peaks_cwt
 
@@ -9,9 +9,9 @@ from VPG_Analyzer.IVPGAnalyzer import IVPGAnalyzer
 class VPGAnalyzer(IVPGAnalyzer):
     def __init__(self):
         self.win_size = 6
-        self.lowcut = 0.3
+        self.lowcut = 0.01
         self.highcut = 2
-        self.order = 5
+        self.order = 2
 
         self.ww1 = 2
         self.ww2 = 15
@@ -28,7 +28,7 @@ class VPGAnalyzer(IVPGAnalyzer):
         :param order: Порядок фильтра
         :return: Отфильтрованный сигнал
         """
-        sos = butter(order, (lowcut, highcut), 'bp', fs=fd, output='sos')
+        sos = butter(order, (lowcut, highcut), 'bandpass', fs=fd, output='sos')
         return sosfilt(sos, signal)
 
     @staticmethod
@@ -63,8 +63,11 @@ class VPGAnalyzer(IVPGAnalyzer):
         :param fd: Частота дискретизации
         :return: Отфильтрованный сигнал ВПГ
         """
+        z = np.polyfit(range(len(vpg)), vpg, 38)
+        p = np.poly1d(z)
+        vpg = vpg - p(range(len(vpg)))
+        vpg = medfilt(vpg, 3)
         vpg = self.butter_bandpass_filter(vpg, self.lowcut, self.highcut, fd, order=self.order)
-        vpg = self.smooth(vpg, self.win_size)
         return vpg
 
     def _adapt_smooth(self, sig: list) -> np.ndarray:

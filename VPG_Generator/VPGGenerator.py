@@ -18,6 +18,8 @@ class VPGGenerator(IVPGGenerator):
         self.__predictor = dlib.shape_predictor(predictor_path)
         self.__cascade = cv2.CascadeClassifier(cascade_path)
 
+        self._points_pred = None
+
     def detect_face(self, frame: np.ndarray) -> tuple:
         """
         Метод выделения лица на изображении при помощи каскадов хаара
@@ -58,7 +60,17 @@ class VPGGenerator(IVPGGenerator):
         if len(rectangle) != 0:
             x1, y1, x2, y2 = rectangle
             rect = dlib.rectangle(int(x1), int(y1), int(x2 + 1), int(y2 + 1))
-        return np.matrix([[p.x, p.y] for p in self.__predictor(frame, rect).parts()])
+
+        if self._points_pred is None:
+            self._points_pred = np.matrix([[p.x, p.y] for p in self.__predictor(frame, rect).parts()])
+            return self._points_pred
+
+        points = np.matrix([[p.x, p.y] for p in self.__predictor(frame, rect).parts()])
+        for i in range(len(points)):
+            delta = np.abs(points[i] - self._points_pred[i])
+            if np.max(delta) > 2:
+                self._points_pred[i] = (self._points_pred[i] + points[i]) // 2
+        return self._points_pred
 
     def _get_segmented_frame(self, frame: np.ndarray) -> np.ndarray:
         """
@@ -67,19 +79,21 @@ class VPGGenerator(IVPGGenerator):
         :return: vpg_frame - Массив
         """
         # Ищем лицо
-        face_frame, rectangle = self.detect_face(frame)
+        _, rectangle = self.detect_face(frame)
         if len(rectangle) == 0:
             return np.array([])
 
         # Ищем контрольные точки
-        frame_gray = cv2.cvtColor(face_frame, cv2.COLOR_BGR2GRAY)
-        points = self.get_landmarks(frame_gray, [])
+        points = self.get_landmarks(frame, rectangle)
 
         #Формируем области интереса
         ver = [50, 33, 30, 29]              # Точки на носу
         hor = [4, 5, 6, 7, 8, 9, 10, 11]    # Точки на подбородке
 
-        channels = cv2.split(face_frame)
+        frame = cv2.medianBlur(frame, 3)
+        frame = cv2.GaussianBlur(frame, (3, 3), 5)
+
+        channels = cv2.split(frame)
         one_frame_vpg = np.zeros(shape=(3, len(ver) - 1, len(hor) - 1))
 
         try:
