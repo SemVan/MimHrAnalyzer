@@ -9,50 +9,24 @@ import time
 
 from VPG_Generator.VPGGenerator import VPGGenerator
 from VPG_Analyzer.VPGAnalyzer import VPGAnalyzer
+from Frame_handler_VPG.FrameHandlerVPG import FrameHandlerVPG
 
 
 class App:
     def __init__(self, path='Data'):
         self.__path = path
-        self.__queue = mp.Queue()
-        self.__frame_handler_process = mp.Process(target=self._frame_handler, args=(self.__queue,))
+        self.__frame_handler = FrameHandlerVPG('vpg.json')
         self.vpg = []
         self.__vpg_filt = []
         self.fps = 0
-
-    @staticmethod
-    def _frame_handler(queue):
-        """
-        Метод параллельной обработки кадров
-        :param queue: Очерь, в которую будут складываться кадры
-        :return: None
-        """
-        vpg_generator = VPGGenerator()
-        vpg = []
-        while True:
-            # Если в очереди нет кадров продолжи ожидать
-            if queue.empty():
-                continue
-
-            frame = queue.get()
-
-            # Проверка на конец регистрации
-            if frame is None:
-                break
-
-            value = vpg_generator.get_vpg_discret(frame)
-            #value = vpg_generator.get_vpg_discret_without_face(frame)
-            vpg.append(value)
-
-        with open('vpg.json', 'w') as file:
-            json.dump(vpg, file)
 
     def _registrate(self):
         """
         Метод регистрации видео
         :return: None
         """
-        self.__frame_handler_process.start()
+        # Запуск процесса обработки
+        self.__frame_handler.start()
 
         cap = cv2.VideoCapture(0)
         cap.set(cv2.CAP_PROP_AUTO_EXPOSURE, 1)  # auto mode
@@ -76,7 +50,8 @@ class App:
                 break
 
             cv2.imshow('Video', frame)
-            self.__queue.put(frame)
+            # Отправка кадра на обработку
+            self.__frame_handler.push(frame)
             video.write(frame)
             #print(cap.get(cv2.CAP_PROP_AUTO_EXPOSURE))
 
@@ -88,12 +63,10 @@ class App:
                 break
             #print(time.time() - start)
 
-        self.__queue.put(None)
-        self.__frame_handler_process.join()
-
-        # Получение сигнала ВПГ
-        with open("vpg.json", 'r') as file:
-            self.vpg = json.load(file)
+        # Завершение регистрации
+        self.__frame_handler.finish()
+        # Получение сигнала ВПГ (С ожиданием обработки)
+        self.vpg = self.__frame_handler.join()
 
     def _analyzer(self):
         """

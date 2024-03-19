@@ -149,9 +149,9 @@ def test(vpg_generator):
         #Тестируем методы
         print('Тестирование:')
         #test_face_detector(vpg_generator, frames)
-        test_get_landmarks(vpg_generator, frames)
+        #test_get_landmarks(vpg_generator, frames)
         #test_get_segmented_frame(vpg_generator, frames)
-        #vpg = test_get_report(vpg_generator, frames)
+        vpg = test_get_report(vpg_generator, frames)
 
         #print(frames[0])
         #vpg_generator.get_vpg_discret(frames[54])
