@@ -1,15 +1,11 @@
-import multiprocessing as mp
-import matplotlib.pyplot as plt
-import cv2
-import numpy as np
-import math
-import json
 import os
-import time
 
-from VPG_Generator.VPGGenerator import VPGGenerator
+import cv2
+import matplotlib.pyplot as plt
+import numpy as np
+
+from Frame_handler.FrameHandlerVPG import FrameHandlerVPG
 from VPG_Analyzer.VPGAnalyzer import VPGAnalyzer
-from Frame_handler_VPG.FrameHandlerVPG import FrameHandlerVPG
 
 
 class App:
@@ -86,7 +82,7 @@ class App:
         # Нормолизуем сигнал
         self.vpg = (self.vpg - np.mean(self.vpg)) / np.std(self.vpg)
 
-        plt.plot(self.vpg, label='ВПГ после нормолизации')
+        plt.plot(self.vpg, label='ВПГ после нормализации')
 
         # Фильтрация
         self.__vpg_filt = vpg_analyzer.filt(self.vpg, self.fps)

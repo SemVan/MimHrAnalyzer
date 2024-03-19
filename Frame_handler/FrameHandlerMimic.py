@@ -1,13 +1,15 @@
-import numpy as np
-import multiprocessing as mp
 import json
+import multiprocessing as mp
+import time
 
-from VPG_Generator.VPGGenerator import VPGGenerator
-from Frame_handler_VPG.IFrameHandler import IFrameHandler
+import numpy as np
+
+from Frame_handler.IFrameHandler import IFrameHandler
+from Mimic_Analyzer.MimicAnalyzer import MimicAnalyzer
 
 
-class FrameHandlerVPG(IFrameHandler):
-    def __init__(self, path='vpg.json'):
+class FrameHandlerMimic(IFrameHandler):
+    def __init__(self, path='mimic.json'):
         """
         Инициализатор
         :param path: Название файла для передачи между процессами
@@ -20,11 +22,11 @@ class FrameHandlerVPG(IFrameHandler):
     def _frame_handler(queue, path):
         """
         Метод параллельной обработки кадров
-        :param queue: Очерь, в которую будут складываться кадры
+        :param queue: Очередь, в которую будут складываться кадры
         :return: None
         """
-        vpg_generator = VPGGenerator()
-        vpg = []
+        mimic_analyzer = MimicAnalyzer()
+        results = []
         while True:
             # Если в очереди нет кадров продолжи ожидать
             if queue.empty():
@@ -36,12 +38,11 @@ class FrameHandlerVPG(IFrameHandler):
             if frame is None:
                 break
 
-            value = vpg_generator.get_vpg_discret(frame)
-            # value = vpg_generator.get_vpg_discret_without_face(frame)
-            vpg.append(value)
+            result = mimic_analyzer.process_frame(frame)
+            results.append(result)
 
         with open(path, 'w') as file:
-            json.dump(vpg, file)
+            json.dump(results, file)
 
     def start(self):
         """
@@ -63,18 +64,23 @@ class FrameHandlerVPG(IFrameHandler):
         """
         self.__queue.put(None)
 
-    def join(self, timeout=None) -> list:
+    def join(self, timeout=1) -> list:
         """
         Метод ожидания завершения процесса обработки
         :param timeout: время ожидания завершения (В секундах)
-        :return: Массив ВПГ (Не фильтрованный)
+        :return: Массив результатов распознавания мимики
         """
-        self.__process.join(timeout=timeout)
-        vpg = []
-        # Получение сигнала ВПГ
+        while True:
+            time.sleep(1)
+            if self.__queue.qsize() == 0:
+                self.__process.join(timeout=timeout)
+                break
+
+        results = []
+        # Получение результатов распознавания мимики
         with open(self.__path, 'r') as file:
-            vpg = json.load(file)
-        return vpg
+            results = json.load(file)
+        return results
 
     def is_alive(self) -> bool:
         """
