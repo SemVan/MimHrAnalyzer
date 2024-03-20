@@ -258,7 +258,7 @@ class VPGAnalyzer(IVPGAnalyzer):
         :return: Массив значений ЧСС
         """
         peak = self.find_peaks(vpg)
-        # Проверка на возможность рассчитать пики
+        # Проверка на достаточное колличество пиков
         if len(peak) < 2:
             return [None for _ in range(len(vpg))]
 
