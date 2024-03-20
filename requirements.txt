@@ -6,3 +6,5 @@ matplotlib
 mediapipe
 onnxruntime
 pandas
+pyside6
+pyqtgraph

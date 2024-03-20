@@ -6,7 +6,7 @@ import cv2
 from PySide6.QtCore import Qt, Slot
 from PySide6.QtGui import QPixmap
 from PySide6.QtWidgets import (QApplication, QComboBox, QGroupBox, QProgressBar, QSlider,
-                               QHBoxLayout, QLabel, QMainWindow, QPushButton, 
+                               QHBoxLayout, QLabel, QMainWindow, QPushButton, QCheckBox, 
                                QSizePolicy, QVBoxLayout, QWidget, QStackedWidget)
 
 from gui.img_processing import process_img
@@ -47,9 +47,6 @@ class Emotions_page(QWidget):
         self.left_vertical_layout.addWidget(self.processButton)
         self.left_vertical_layout.addWidget(self.button3)
         
-        #right vertical layout
-        self.right_vertical_layout = QVBoxLayout()
-        
         #group model of emotions progress bars
         self.emotions_group_model = QGroupBox("Emotions")
         self.emotions_group_model.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Expanding)
@@ -58,7 +55,7 @@ class Emotions_page(QWidget):
         
         self.emotions_progress_bars = []
         self.emotions_labels = []
-        for i in range(5):
+        for i in range(8):
             self.emotions_labels.append(QLabel("emotion "+str(i)))
             self.emotions_progress_bars.append(QProgressBar())
             layout = QHBoxLayout()
@@ -71,35 +68,55 @@ class Emotions_page(QWidget):
         #group model of movment progress bars
         self.movement_group_model = QGroupBox("Movement")
         self.movement_group_model.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Expanding)
+        self.horizontal_movement_group_model_layout = QHBoxLayout()
         
-        self.movement_group_model_layout = QVBoxLayout()
+        self.left_movement_group_model_layout = QVBoxLayout()
+        self.right_movement_group_model_layout = QVBoxLayout()
         
         self.movement_progress_bars = []
         self.movement_labels = []
-        for i in range(5):
+        for i in range(12):
             self.movement_labels.append(QLabel("mov "+str(i)))
             self.movement_progress_bars.append(QProgressBar())
             layout = QHBoxLayout()
             layout.addWidget(self.movement_labels[i])
             layout.addWidget(self.movement_progress_bars[i])
-            self.movement_group_model_layout.addLayout(layout)
+            if i<6:
+                self.left_movement_group_model_layout.addLayout(layout)
+            else:
+                self.right_movement_group_model_layout.addLayout(layout)
         
-        self.movement_group_model.setLayout(self.movement_group_model_layout)
+        self.horizontal_movement_group_model_layout.addLayout(self.left_movement_group_model_layout)
+        self.horizontal_movement_group_model_layout.addLayout(self.right_movement_group_model_layout)
+        self.movement_group_model.setLayout(self.horizontal_movement_group_model_layout)
         
-        #group model of emotions checkboxes
+        #group model of movement checkboxes
         self.checkbox_group_model = QGroupBox("checkbox")
         self.checkbox_group_model.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Expanding)
+        self.horizontal_checkbox_group_model_layout = QHBoxLayout()
         
-        self.checkbox_group_model_layout = QVBoxLayout()
+        self.left_checkbox_group_model_layout = QVBoxLayout()
+        self.right_checkbox_group_model_layout = QVBoxLayout()
         
         self.checkbox_progress_bars = []
-        for i in range(5):
-            self.checkbox_progress_bars.append(QProgressBar())
-            self.checkbox_group_model_layout.addWidget(self.checkbox_progress_bars[i])
+        self.checkbox_labels = []
+        for i in range(12):
+            self.checkbox_progress_bars.append(QCheckBox())
+            self.checkbox_labels.append(QLabel('movement ' + str(i)))
+            layout = QHBoxLayout()
+            layout.addWidget(self.checkbox_labels[i])
+            layout.addWidget(self.checkbox_progress_bars[i])
+            if i < 6:
+                self.left_checkbox_group_model_layout.addLayout(layout)
+            else:
+                self.right_checkbox_group_model_layout.addLayout(layout)
         
-        self.checkbox_group_model.setLayout(self.checkbox_group_model_layout)
+        self.horizontal_checkbox_group_model_layout.addLayout(self.left_checkbox_group_model_layout)
+        self.horizontal_checkbox_group_model_layout.addLayout(self.right_checkbox_group_model_layout)
+        self.checkbox_group_model.setLayout(self.horizontal_checkbox_group_model_layout)
         
-        
+        #right vertical layout
+        self.right_vertical_layout = QVBoxLayout()
         self.right_vertical_layout.addWidget(self.emotions_group_model)
         self.right_vertical_layout.addWidget(self.movement_group_model)
         self.right_vertical_layout.addWidget(self.checkbox_group_model)

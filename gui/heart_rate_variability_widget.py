@@ -49,11 +49,30 @@ class Heart_rate_variability_page(QWidget):
         
         self.right_vertical_layout = QVBoxLayout()
         
-        self.plot_widget_1 = pg.PlotWidget()
+        #init pens for lines coloring
+        self.blue_pen = pg.mkPen(color=(0, 184, 255))
+        self.green_pen = pg.mkPen(color=(84, 255, 159))
+        
+        #init graph and lines for heart rate
+        self.hr_plot_widget = pg.PlotWidget()
+        self.hr_plot_widget.setBackground("w")
+        self.hr_plot_widget.setTitle("В данный момент впг", color="b", size="12pt")
+        self.hr_frames = []
+        self.hr_values = []
+        self.hr_indicator_position = 0
+        self.hr_line = self.hr_plot_widget.plot(
+            self.hr_frames,
+            self.hr_values,
+            pen=self.blue_pen)
+        self.hr_indicator = self.hr_plot_widget.addLine(
+            x=self.hr_indicator_position,
+            pen=self.green_pen)
+        
+        
         self.plot_widget_2 = pg.PlotWidget()
         self.plot_widget_3 = pg.PlotWidget()
         
-        self.right_vertical_layout.addWidget(self.plot_widget_1)
+        self.right_vertical_layout.addWidget(self.hr_plot_widget)
         self.right_vertical_layout.addWidget(self.plot_widget_2)
         self.right_vertical_layout.addWidget(self.plot_widget_3)
         
@@ -77,6 +96,15 @@ class Heart_rate_variability_page(QWidget):
         
     def setPosition(self, position):
         print(position)
+        
+    def updateHRPlot(self, hr_frames, hr_vals):
+        self.hr_frames = hr_frames
+        self.hr_values = hr_vals
+        self.hr_line.setData(self.hr_frames, self.hr_values)
+        
+    def updateHRIndicator(self, position):
+        self.hr_indicator_position = position
+        self.hr_indicator.setValue(self.hr_indicator_position)
         
  
 if __name__ == "__main__":

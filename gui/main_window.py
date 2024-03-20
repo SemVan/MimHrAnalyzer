@@ -70,11 +70,16 @@ class MainWindow(QMainWindow):
         self.all_pages.emotions_page.loadButton.clicked.connect(self.open_video)
         self.all_pages.heart_rate_variability_page.positionSlider.sliderMoved.connect(self.setPositionHRV)
         self.all_pages.emotions_page.positionSlider.sliderMoved.connect(self.setPositionEmo)
+        self.all_pages.video_capture_page.stop_registration_button.clicked.connect(self.kill_thread)
         
         #init variables
         self.current_video_path = ''
         self.current_video = []
+        self.current_vpg = []
         self.current_video_fps = 0
+        self.current_vpg_frames = []
+        self.current_vpg_start_frame = 0
+        self.current_vpg_end_frame = 0
        
     @Slot()
     def go_to_video_capture_page(self):
@@ -84,9 +89,13 @@ class MainWindow(QMainWindow):
         self.main_menu.hrv_button.setEnabled(True)
         self.main_menu.emotions_button.setEnabled(True)
         
-        self.main_menu.video_button.setStyleSheet("background-color : #006cdc; color : black")
-        self.main_menu.hrv_button.setStyleSheet("background-color : #00b8ff")
-        self.main_menu.emotions_button.setStyleSheet("background-color : #00b8ff")
+        self.main_menu.video_button.setStyleSheet("font-family : ALS Sector;"
+                                                  "background-color : #006cdc;"
+                                                  "color : black")
+        self.main_menu.hrv_button.setStyleSheet("font-family : ALS Sector;"
+                                                "background-color : #00b8ff")
+        self.main_menu.emotions_button.setStyleSheet("font-family : ALS Sector;"
+                                                     "background-color : #00b8ff")
      
     @Slot()
     def go_to_heart_rate_variability_page(self):
@@ -96,9 +105,13 @@ class MainWindow(QMainWindow):
         self.main_menu.hrv_button.setEnabled(False)
         self.main_menu.emotions_button.setEnabled(True)
         
-        self.main_menu.video_button.setStyleSheet("background-color : #00b8ff")
-        self.main_menu.hrv_button.setStyleSheet("background-color : #006cdc; color : black")
-        self.main_menu.emotions_button.setStyleSheet("background-color : #00b8ff")
+        self.main_menu.video_button.setStyleSheet("font-family : ALS Sector;"
+                                                  "background-color : #00b8ff")
+        self.main_menu.hrv_button.setStyleSheet("font-family : ALS Sector;"
+                                                "background-color : #006cdc;"
+                                                "color : black")
+        self.main_menu.emotions_button.setStyleSheet("font-family : ALS Sector;"
+                                                     "background-color : #00b8ff")
      
     @Slot()
     def go_to_emotions_page(self):
@@ -108,9 +121,13 @@ class MainWindow(QMainWindow):
         self.main_menu.hrv_button.setEnabled(True)
         self.main_menu.emotions_button.setEnabled(False)
         
-        self.main_menu.video_button.setStyleSheet("background-color : #00b8ff")
-        self.main_menu.hrv_button.setStyleSheet("background-color : #00b8ff")
-        self.main_menu.emotions_button.setStyleSheet("background-color : #006cdc; color : black")
+        self.main_menu.video_button.setStyleSheet("font-family : ALS Sector;"
+                                                  "background-color : #00b8ff")
+        self.main_menu.hrv_button.setStyleSheet("font-family : ALS Sector;"
+                                                "background-color : #00b8ff")
+        self.main_menu.emotions_button.setStyleSheet("font-family : ALS Sector;"
+                                                     "background-color : #006cdc;"
+                                                     "color : black")
         
     @Slot()
     def open_video(self):
@@ -125,22 +142,8 @@ class MainWindow(QMainWindow):
         self.current_video_path = filename
         try: 
             self.current_video, self.current_video_fps = read_video(filename)
+            self.tune_video_widgets()
             
-            self.all_pages.heart_rate_variability_page.status_label.setText("Видео загружено")
-            self.all_pages.emotions_page.status_label.setText("Видео загружено")
-            
-            self.all_pages.heart_rate_variability_page.videoLabel.setPixmap(QPixmap.fromImage(process_img(self.current_video[0])))
-            self.all_pages.emotions_page.videoLabel.setPixmap(QPixmap.fromImage(process_img(self.current_video[0])))
-            
-            self.all_pages.heart_rate_variability_page.positionSlider.setMinimum(0)
-            self.all_pages.heart_rate_variability_page.positionSlider.setMaximum(len(self.current_video)-1)
-            self.all_pages.heart_rate_variability_page.positionSlider.setSliderPosition(0)
-            self.all_pages.heart_rate_variability_page.positionSlider.setEnabled(True)
-            
-            self.all_pages.emotions_page.positionSlider.setMinimum(0)
-            self.all_pages.emotions_page.positionSlider.setMaximum(len(self.current_video)-1)
-            self.all_pages.emotions_page.positionSlider.setSliderPosition(0)
-            self.all_pages.emotions_page.positionSlider.setEnabled(True)
         except:
             self.all_pages.heart_rate_variability_page.status_label.setText("Что-то пошло не так")
             self.all_pages.emotions_page.status_label.setText("Что-то пошло не так")
@@ -149,11 +152,65 @@ class MainWindow(QMainWindow):
         self.all_pages.heart_rate_variability_page.videoLabel.setPixmap(QPixmap.fromImage(process_img(self.current_video[position])))
         self.all_pages.emotions_page.videoLabel.setPixmap(QPixmap.fromImage(process_img(self.current_video[position])))
         self.all_pages.emotions_page.positionSlider.setSliderPosition(position)
+        self.all_pages.heart_rate_variability_page.updateHRIndicator(position)
         
     def setPositionEmo(self, position):
         self.all_pages.heart_rate_variability_page.videoLabel.setPixmap(QPixmap.fromImage(process_img(self.current_video[position])))
         self.all_pages.emotions_page.videoLabel.setPixmap(QPixmap.fromImage(process_img(self.current_video[position])))
         self.all_pages.heart_rate_variability_page.positionSlider.setSliderPosition(position)
+        self.all_pages.heart_rate_variability_page.updateHRIndicator(position)
+    
+    @Slot()
+    def kill_thread(self):
+        
+        self.all_pages.video_capture_page.kill_thread()
+        self.current_video = self.all_pages.video_capture_page.current_video.copy()
+        self.all_pages.video_capture_page.current_video = []
+        self.current_vpg = self.all_pages.video_capture_page.current_vpg.copy()
+        self.all_pages.video_capture_page.current_vpg = []
+        self.tune_video_widgets()
+        self.prepare_vpg()
+        # self.all_pages.heart_rate_variability_page.hr_frames = self.current_vpg_frames
+        # self.all_pages.heart_rate_variability_page.hr_values = self.current_vpg
+        self.all_pages.heart_rate_variability_page.updateHRPlot(self.current_vpg_frames,
+                                                                self.current_vpg)
+        self.all_pages.heart_rate_variability_page.updateHRIndicator(0)
+        
+    def prepare_vpg(self):
+        
+        enter_seq = False
+        
+        for i in range(len(self.current_vpg)):
+            
+            if not enter_seq and self.current_vpg[i] != None:
+                self.current_vpg_start_frame = i
+                enter_seq = True
+                
+            if enter_seq and self.current_vpg[i] == None or i == len(self.current_vpg)-1:
+                self.current_vpg_end_frame = i
+                break
+            
+        self.current_vpg = self.current_vpg[self.current_vpg_start_frame:self.current_vpg_end_frame]
+        self.current_vpg_frames = [i for i in range(self.current_vpg_start_frame, self.current_vpg_end_frame)]
+        
+    def tune_video_widgets(self):
+        
+        self.all_pages.heart_rate_variability_page.status_label.setText("Видео загружено")
+        self.all_pages.emotions_page.status_label.setText("Видео загружено")
+        
+        self.all_pages.heart_rate_variability_page.videoLabel.setPixmap(QPixmap.fromImage(process_img(self.current_video[0])))
+        self.all_pages.emotions_page.videoLabel.setPixmap(QPixmap.fromImage(process_img(self.current_video[0])))
+        
+        self.all_pages.heart_rate_variability_page.positionSlider.setMinimum(0)
+        self.all_pages.heart_rate_variability_page.positionSlider.setMaximum(len(self.current_video)-1)
+        self.all_pages.heart_rate_variability_page.positionSlider.setSliderPosition(0)
+        self.all_pages.heart_rate_variability_page.positionSlider.setEnabled(True)
+        
+        self.all_pages.emotions_page.positionSlider.setMinimum(0)
+        self.all_pages.emotions_page.positionSlider.setMaximum(len(self.current_video)-1)
+        self.all_pages.emotions_page.positionSlider.setSliderPosition(0)
+        self.all_pages.emotions_page.positionSlider.setEnabled(True)
+        
             
         
 if __name__ == "__main__":

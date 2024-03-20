@@ -11,6 +11,7 @@ from PySide6.QtWidgets import (QApplication,
                                QVBoxLayout, QWidget, QLineEdit)
 
 from gui.img_processing import process_img
+from Frame_handler_VPG.FrameHandlerVPG import FrameHandlerVPG
 
 class Thread(QThread):
     updateFrame = Signal(QImage)
@@ -20,31 +21,46 @@ class Thread(QThread):
         self.status = True
         self.cap = True
         self.path = 'Data/'
-        self.current_file_name = 'temp.avi'
+        self.current_file_name = 'temp'
+        self.fps = 0
+        self.video = []
 
     def run(self):
         self.cap = cv2.VideoCapture(0)
         
-        # frame_width = int(self.cap.get(3))
-        # frame_height = int(self.cap.get(4))
-        path = os.path.join(self.path, self.current_file_name)
-        print(path)
-        #video = cv2.VideoWriter(path, cv2.VideoWriter_fourcc('M', 'J', 'P', 'G'), self.fps, (frame_width, frame_height))
+        frame_width = int(self.cap.get(3))
+        frame_height = int(self.cap.get(4))
+        self.fps = self.cap.get(cv2.CAP_PROP_FPS)
+        
+        path = os.path.join(self.path, self.current_file_name + '/')
+        self.frame_handler = FrameHandlerVPG(os.path.join(path, 'vpg.json'))
+        self.frame_handler.start()
+        try:
+            os.mkdir(path)
+        except:
+            pass
+        path = os.path.join(path, self.current_file_name + '.avi')
+        video = cv2.VideoWriter(path, cv2.VideoWriter_fourcc('M', 'J', 'P', 'G'), self.fps, (frame_width, frame_height))
         
         while self.status:
             ret, frame = self.cap.read()
             if not ret:
                 continue
-
+            
+            self.frame_handler.push(frame)
+            self.video.append(frame)
+            video.write(frame)
             scaled_img = process_img(frame)
 
             # Emit signal
             self.updateFrame.emit(scaled_img)
+        
+        video.release()
         sys.exit(-1)
         
     def setCurrentFileName(self, current_name):
         if current_name:
-            self.current_file_name = current_name  + '.avi'
+            self.current_file_name = current_name
 
 class Video_capture_page(QWidget):
     
@@ -53,6 +69,7 @@ class Video_capture_page(QWidget):
         
         #init variables
         self.current_file_name = ''
+        self.vpg = []
         
         #video widget with placeholder
         self.placeholder = process_img(cv2.imread("Resources/placeholder.jpg"))               
@@ -71,6 +88,7 @@ class Video_capture_page(QWidget):
         
         #info text label
         self.label = QLabel("здесь пока нет никакого текста")
+        #self.label.setFixedSize(640, 640)
         self.label.setAlignment(Qt.AlignCenter)
         
         #registrate buttons
@@ -88,6 +106,7 @@ class Video_capture_page(QWidget):
         self.horizontal_layout.addLayout(self.left_vertical_layout)
         self.horizontal_layout.addLayout(self.right_vertical_layout)
         
+        #main widget layout 
         self.setLayout(self.horizontal_layout)
         
         #init thread
@@ -95,27 +114,31 @@ class Video_capture_page(QWidget):
         
         #connections
         self.start_registration_button.clicked.connect(self.start)
-        self.stop_registration_button.clicked.connect(self.kill_thread)
+        # self.stop_registration_button.clicked.connect(self.kill_thread)
         self.stop_registration_button.setEnabled(False)
         self.th.updateFrame.connect(self.setImage)
         self.inputLine.editingFinished.connect(self.set_file_name)
 
-    @Slot()
     def kill_thread(self):
-        print("Finishing...")
+        # print("Finishing...")
         self.status = False
+        handler = self.th.frame_handler
         self.th.cap.release()
-        cv2.destroyAllWindows()  
-        self.videoLabel.setPixmap(QPixmap.fromImage(self.placeholder)) 
+        cv2.destroyAllWindows()
+        self.current_video = self.th.video.copy()
         self.stop_registration_button.setEnabled(False)
         self.start_registration_button.setEnabled(True)                         
         self.th.terminate()
+        self.videoLabel.setPixmap(QPixmap.fromImage(self.placeholder))
         # Give time for the thread to finish
         time.sleep(1)
+        handler.finish()
+        self.current_vpg = handler.join()
+        
 
     @Slot()
     def start(self):
-        print("Starting...")
+        # print("Starting...")
         self.stop_registration_button.setEnabled(True)
         self.start_registration_button.setEnabled(False)
         self.th.setCurrentFileName(self.current_file_name)
@@ -128,7 +151,6 @@ class Video_capture_page(QWidget):
     @Slot()
     def set_file_name(self):
         self.current_file_name = self.inputLine.text()
-        #print(self.current_file_name)
         
         
 if __name__ == "__main__":
