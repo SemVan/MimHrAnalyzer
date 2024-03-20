@@ -16,6 +16,8 @@ class Emotions_page(QWidget):
     def __init__(self):
         QWidget.__init__(self)
         
+        self.current_mimic = 0
+        
         #right vertical layout
         self.left_vertical_layout = QVBoxLayout()
         
@@ -61,6 +63,7 @@ class Emotions_page(QWidget):
             layout = QHBoxLayout()
             layout.addWidget(self.emotions_labels[i])
             layout.addWidget(self.emotions_progress_bars[i])
+            self.emotions_progress_bars[i].setMaximum(1000)
             self.emotions_group_model_layout.addLayout(layout)
         
         self.emotions_group_model.setLayout(self.emotions_group_model_layout)
@@ -81,6 +84,7 @@ class Emotions_page(QWidget):
             layout = QHBoxLayout()
             layout.addWidget(self.movement_labels[i])
             layout.addWidget(self.movement_progress_bars[i])
+            self.movement_progress_bars[i].setMaximum(1000)
             if i<6:
                 self.left_movement_group_model_layout.addLayout(layout)
             else:
@@ -128,6 +132,22 @@ class Emotions_page(QWidget):
         self.horizontal_layout.addLayout(self.right_vertical_layout)
         
         self.setLayout(self.horizontal_layout)
+        
+    def updateMimic(self, mimic):
+        
+        self.current_mimic = mimic
+        if self.current_mimic['pred_au_intensity']:
+            for i in range(12):
+                self.movement_progress_bars[i].setValue(int(1000*self.current_mimic['pred_au_intensity'][i]))
+                
+        if self.current_mimic['pred_expression']:
+            for i in range(8):
+                self.emotions_progress_bars[i].setValue(int(1000*self.current_mimic['pred_expression'][i]))
+                
+        if self.current_mimic['pred_au_presence']:
+            for i in range(12):
+                self.checkbox_progress_bars[i].setChecked(self.current_mimic['pred_au_presence'][i])
+        
         
         
 if __name__ == "__main__":

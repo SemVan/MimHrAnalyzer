@@ -12,6 +12,8 @@ from PySide6.QtWidgets import (QApplication,
 
 from gui.img_processing import process_img
 from Frame_handler_VPG.FrameHandlerVPG import FrameHandlerVPG
+from Frame_handler.FrameHandlerMimic import FrameHandlerMimic
+from Mimic_Analyzer.MimicAnalyzer import MimicAnalyzer
 
 class Thread(QThread):
     updateFrame = Signal(QImage)
@@ -33,8 +35,13 @@ class Thread(QThread):
         self.fps = self.cap.get(cv2.CAP_PROP_FPS)
         
         path = os.path.join(self.path, self.current_file_name + '/')
+        
         self.frame_handler = FrameHandlerVPG(os.path.join(path, 'vpg.json'))
         self.frame_handler.start()
+        
+        self.mimic_frame_handler = FrameHandlerMimic('mimic.json')
+        self.mimic_frame_handler.start()
+        
         try:
             os.mkdir(path)
         except:
@@ -48,10 +55,13 @@ class Thread(QThread):
                 continue
             
             self.frame_handler.push(frame)
+            self.mimic_frame_handler.push(frame)
+            
             self.video.append(frame)
+            
             video.write(frame)
+            
             scaled_img = process_img(frame)
-
             # Emit signal
             self.updateFrame.emit(scaled_img)
         
@@ -87,7 +97,11 @@ class Video_capture_page(QWidget):
         self.left_vertical_layout.addWidget(self.inputLine)
         
         #info text label
-        self.label = QLabel("здесь пока нет никакого текста")
+        self.label = QLabel("приложение напомнит вам,\n"
+                            "что что-то не так (если не сдохнет),\n"
+                            "если не дождаться возвращения плейсхолдера\n"
+                            "после окончания записи видео\n\n"
+                            "я пока думаю над решением")
         #self.label.setFixedSize(640, 640)
         self.label.setAlignment(Qt.AlignCenter)
         
@@ -123,6 +137,7 @@ class Video_capture_page(QWidget):
         # print("Finishing...")
         self.status = False
         handler = self.th.frame_handler
+        mimic_handler = self.th.mimic_frame_handler
         self.th.cap.release()
         cv2.destroyAllWindows()
         self.current_video = self.th.video.copy()
@@ -133,8 +148,9 @@ class Video_capture_page(QWidget):
         # Give time for the thread to finish
         time.sleep(1)
         handler.finish()
+        mimic_handler.finish()
         self.current_vpg = handler.join()
-        
+        self.current_mimic = mimic_handler.join()        
 
     @Slot()
     def start(self):

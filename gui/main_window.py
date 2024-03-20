@@ -80,6 +80,7 @@ class MainWindow(QMainWindow):
         self.current_vpg_frames = []
         self.current_vpg_start_frame = 0
         self.current_vpg_end_frame = 0
+        self.current_mimic_data = []
        
     @Slot()
     def go_to_video_capture_page(self):
@@ -153,12 +154,14 @@ class MainWindow(QMainWindow):
         self.all_pages.emotions_page.videoLabel.setPixmap(QPixmap.fromImage(process_img(self.current_video[position])))
         self.all_pages.emotions_page.positionSlider.setSliderPosition(position)
         self.all_pages.heart_rate_variability_page.updateHRIndicator(position)
+        self.all_pages.emotions_page.updateMimic(self.current_mimic_data[position])
         
     def setPositionEmo(self, position):
         self.all_pages.heart_rate_variability_page.videoLabel.setPixmap(QPixmap.fromImage(process_img(self.current_video[position])))
         self.all_pages.emotions_page.videoLabel.setPixmap(QPixmap.fromImage(process_img(self.current_video[position])))
         self.all_pages.heart_rate_variability_page.positionSlider.setSliderPosition(position)
         self.all_pages.heart_rate_variability_page.updateHRIndicator(position)
+        self.all_pages.emotions_page.updateMimic(self.current_mimic_data[position])
     
     @Slot()
     def kill_thread(self):
@@ -168,13 +171,14 @@ class MainWindow(QMainWindow):
         self.all_pages.video_capture_page.current_video = []
         self.current_vpg = self.all_pages.video_capture_page.current_vpg.copy()
         self.all_pages.video_capture_page.current_vpg = []
+        self.current_mimic_data = self.all_pages.video_capture_page.current_mimic.copy()
+        self.all_pages.video_capture_page.current_mimic = []
         self.tune_video_widgets()
         self.prepare_vpg()
-        # self.all_pages.heart_rate_variability_page.hr_frames = self.current_vpg_frames
-        # self.all_pages.heart_rate_variability_page.hr_values = self.current_vpg
         self.all_pages.heart_rate_variability_page.updateHRPlot(self.current_vpg_frames,
                                                                 self.current_vpg)
         self.all_pages.heart_rate_variability_page.updateHRIndicator(0)
+        self.all_pages.emotions_page.updateMimic(self.current_mimic_data[0])
         
     def prepare_vpg(self):
         
