@@ -249,3 +249,55 @@ class VPGAnalyzer(IVPGAnalyzer):
         # Расчёт ЧСС
         hr = f[np.argmax(vpg_spec)] * 60
         return hr
+
+    def get_report_hr(self, vpg: list, fd: float) -> list:
+        """
+        Метод расчёта кривой изменения ЧСС
+        :param vpg: Отфильтрованный сигнал ВПГ
+        :param fd: Частота дискоетизации
+        :return: Массив значений ЧСС
+        """
+        peak = self.find_peaks(vpg)
+        # Проверка на возможность рассчитать пики
+        if len(peak) < 2:
+            return [None for _ in range(len(vpg))]
+
+        # Если в сигнале много пиков
+        hr = [None for _ in range(peak[1])]
+        a = 2
+        b = 1
+        c = 0
+        for i in range(peak[1], len(vpg)):
+            if a < len(peak):
+                if i > peak[a]:
+                    a += 1
+                    b += 1
+                    c += 1
+            hr.append(fd / (peak[b] - peak[c]) * 60)
+        return hr
+
+    def get_report_hrv(self, vpg: list, fd: float, number: int, stride=1) -> dict:
+        """
+        Метод расчёта метрик вариабельности сердечного ритма
+        :param vpg: Отфильтрованный сигнал ВПГ
+        :param fd: Частота дискоетизации
+        :param number: Число эллементов в срезе
+        :param stride: Сдвиг окна для расчёта
+        :return: Словарь с ключами: "sdann", "rmssd", "nn50". В каждом элементе хранится массив значений. (По аналогии с ЧСС)
+        """
+        ans = dict()
+        if number > len(vpg):
+            ans['sdann'] = [None for _ in range(len(vpg))]
+            ans['rmssd'] = [None for _ in range(len(vpg))]
+            ans['nn50'] = [None for _ in range(len(vpg))]
+            return ans
+
+        ans['sdann'] = [None for _ in range(number)]
+        ans['rmssd'] = [None for _ in range(number)]
+        ans['nn50'] = [None for _ in range(number)]
+
+        for i in range(number, len(vpg), stride):
+            ans['sdann'].append(self.get_sdann(vpg[i - number: i], fd))
+            ans['rmssd'].append(self.get_rmssd(vpg[i - number: i], fd))
+            ans['nn50'].append(self.get_nn50(vpg[i - number: i], fd))
+        return ans

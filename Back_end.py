@@ -87,19 +87,30 @@ class App:
         # Фильтрация
         self.__vpg_filt = vpg_analyzer.filt(self.vpg, self.fps)
 
-        # Расчёт ЧСС
-        print(f'Длинна сигнала: {len(self.vpg)}')
-        print(f'ЧСС: {vpg_analyzer.get_hr_peak(self.__vpg_filt, self.fps)}')
-        peaks = vpg_analyzer.find_peaks(self.__vpg_filt)
-        print(f'SDANN: {vpg_analyzer.sdann(peaks, self.fps)}')
-        print(f'RMSSD: {vpg_analyzer.rmssd(peaks, self.fps)}')
-        print(f'NN50: {vpg_analyzer.nn50(peaks, self.fps)}')
-
         plt.plot(self.__vpg_filt, label='ВПГ фильтрованный')
         plt.grid()
         plt.legend()
         path = os.path.join(self.__path, "vpg.png")
         plt.savefig(path, dpi=512)
+        plt.show()
+
+        # Расчёт ЧСС
+        hr = vpg_analyzer.get_report_hr(self.__vpg_filt, self.fps)
+        print(f'Длинна сигнала: {len(self.vpg)}')
+        print(f'Длинна сигнала ЧСС: {len(hr)}')
+        print(f'ЧСС: {vpg_analyzer.get_hr_peak(self.__vpg_filt, self.fps)}')
+        print()
+        plt.plot(hr)
+        plt.show()
+
+        # Расчёт SDANN RMSSD NN50
+        peaks = vpg_analyzer.find_peaks(self.__vpg_filt)
+        print(f'SDANN: {vpg_analyzer.sdann(peaks, self.fps)}')
+        print(f'RMSSD: {vpg_analyzer.rmssd(peaks, self.fps)}')
+        print(f'NN50: {vpg_analyzer.nn50(peaks, self.fps)}')
+
+        hrv = vpg_analyzer.get_report_hrv(self.__vpg_filt, self.fps, 100)
+        plt.plot(hrv['sdann'])
         plt.show()
 
     def start(self):
