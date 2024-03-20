@@ -39,7 +39,7 @@ class Thread(QThread):
         self.frame_handler = FrameHandlerVPG(os.path.join(path, 'vpg.json'))
         self.frame_handler.start()
         
-        self.mimic_frame_handler = FrameHandlerMimic('mimic.json')
+        self.mimic_frame_handler = FrameHandlerMimic(os.path.join(path, 'mimic.json'))
         self.mimic_frame_handler.start()
         
         try:
