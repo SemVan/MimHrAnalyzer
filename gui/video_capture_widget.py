@@ -49,6 +49,7 @@ class Thread(QThread):
         path = os.path.join(path, self.current_file_name + '.avi')
         video = cv2.VideoWriter(path, cv2.VideoWriter_fourcc('M', 'J', 'P', 'G'), self.fps, (frame_width, frame_height))
         
+        print('before cicle')
         while self.status:
             ret, frame = self.cap.read()
             if not ret:
@@ -63,10 +64,25 @@ class Thread(QThread):
             
             scaled_img = process_img(frame)
             # Emit signal
-            self.updateFrame.emit(scaled_img)
+            self.updateFrame.emit(scaled_img)           
+        else: print('цикл окончен')
+        
+        print('before processes stopped')    
+        
+        self.frame_handler.finish()
+        self.mimic_frame_handler.finish()
+        
+        print('ill get vpg')
+            
+        self.current_vpg = self.frame_handler.join()
+        self.current_mimic = self.mimic_frame_handler.join() 
+        
+        print("i get vpg")
         
         video.release()
-        sys.exit(-1)
+        # sys.exit(-1)
+        
+        print('im 4kin finished or what')
         
     def setCurrentFileName(self, current_name):
         if current_name:
@@ -123,36 +139,28 @@ class Video_capture_page(QWidget):
         #main widget layout 
         self.setLayout(self.horizontal_layout)
         
-        #init thread
-        self.th = Thread(self)
+        # #init thread
+        # self.th = Thread(self)
         
         #connections
-        self.start_registration_button.clicked.connect(self.start)
-        # self.stop_registration_button.clicked.connect(self.kill_thread)
+        # self.start_registration_button.clicked.connect(self.start)
+        self.stop_registration_button.clicked.connect(self.stop_registration)
         self.stop_registration_button.setEnabled(False)
-        self.th.updateFrame.connect(self.setImage)
+        # self.th.updateFrame.connect(self.setImage)
         self.inputLine.editingFinished.connect(self.set_file_name)
+        #self.th.finished.connect(self.thread_finishing_move)
 
-    def kill_thread(self):
+    def stop_registration(self):
         # print("Finishing...")
-        self.status = False
-        handler = self.th.frame_handler
-        mimic_handler = self.th.mimic_frame_handler
+        self.th.status = False
         self.th.cap.release()
         cv2.destroyAllWindows()
         self.current_video = self.th.video.copy()
         self.stop_registration_button.setEnabled(False)
-        self.start_registration_button.setEnabled(True)                         
-        self.th.terminate()
+        self.start_registration_button.setEnabled(True)                                
         self.videoLabel.setPixmap(QPixmap.fromImage(self.placeholder))
-        # Give time for the thread to finish
-        time.sleep(1)
-        handler.finish()
-        mimic_handler.finish()
-        self.current_vpg = handler.join()
-        self.current_mimic = mimic_handler.join()        
 
-    @Slot()
+    # @Slot()
     def start(self):
         # print("Starting...")
         self.stop_registration_button.setEnabled(True)

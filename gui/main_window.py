@@ -1,5 +1,6 @@
 import os
 import sys
+import time
 
 import cv2, numpy as np
 from PySide6.QtCore import Qt, Slot, QSize
@@ -14,6 +15,7 @@ from PySide6.QtWidgets import (QApplication, QComboBox, QGroupBox,
 from gui.all_pages_widget import All_pages
 from gui.main_menu_widget import Main_menu
 from gui.img_processing import process_img
+from gui.video_capture_widget import Thread
 
 
 def read_video(path):
@@ -70,7 +72,7 @@ class MainWindow(QMainWindow):
         self.all_pages.emotions_page.loadButton.clicked.connect(self.open_video)
         self.all_pages.heart_rate_variability_page.positionSlider.sliderMoved.connect(self.setPositionHRV)
         self.all_pages.emotions_page.positionSlider.sliderMoved.connect(self.setPositionEmo)
-        self.all_pages.video_capture_page.stop_registration_button.clicked.connect(self.kill_thread)
+        self.all_pages.video_capture_page.start_registration_button.clicked.connect(self.start_registration)
         
         #init variables
         self.current_video_path = ''
@@ -162,17 +164,29 @@ class MainWindow(QMainWindow):
         self.all_pages.heart_rate_variability_page.positionSlider.setSliderPosition(position)
         self.all_pages.heart_rate_variability_page.updateHRIndicator(position)
         self.all_pages.emotions_page.updateMimic(self.current_mimic_data[position])
+        
+    def start_registration(self):
+        self.all_pages.video_capture_page.th = Thread(self)
+        self.all_pages.video_capture_page.th.finished.connect(self.kill_thread)
+        self.all_pages.video_capture_page.th.updateFrame.connect(self.all_pages.video_capture_page.setImage)
+        self.all_pages.video_capture_page.start()
+        
     
     @Slot()
     def kill_thread(self):
         
-        self.all_pages.video_capture_page.kill_thread()
+        print('where my vpg')
+        
         self.current_video = self.all_pages.video_capture_page.current_video.copy()
         self.all_pages.video_capture_page.current_video = []
-        self.current_vpg = self.all_pages.video_capture_page.current_vpg.copy()
-        self.all_pages.video_capture_page.current_vpg = []
-        self.current_mimic_data = self.all_pages.video_capture_page.current_mimic.copy()
-        self.all_pages.video_capture_page.current_mimic = []
+        self.current_vpg = self.all_pages.video_capture_page.th.current_vpg.copy()
+        self.current_mimic_data = self.all_pages.video_capture_page.th.current_mimic.copy()
+        
+        self.all_pages.video_capture_page.th.terminate()
+        print('thread gonna sleep for eternity')
+        # Give time for the thread to finish
+        time.sleep(1)
+        
         self.tune_video_widgets()
         self.prepare_vpg()
         self.all_pages.heart_rate_variability_page.updateHRPlot(self.current_vpg_frames,
