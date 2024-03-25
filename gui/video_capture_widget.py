@@ -76,8 +76,6 @@ class Video_capture_page(QWidget):
     def stop_registration(self):
         #stop registration
         self.th.status = False
-
-        print('reg stoped')
              
         self.th.cap.release()
         cv2.destroyAllWindows()

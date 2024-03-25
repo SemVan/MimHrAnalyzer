@@ -8,7 +8,6 @@ from PySide6.QtGui import QImage
 from gui.img_processing import process_img
 from Frame_handler_VPG.FrameHandlerVPG import FrameHandlerVPG
 from Frame_handler.FrameHandlerMimic import FrameHandlerMimic
-# from Mimic_Analyzer.MimicAnalyzer import MimicAnalyzer
 from vpg_analyzer_for_gui import vpg_analyzer
 
 class Thread(QThread):
@@ -77,7 +76,6 @@ class Thread(QThread):
         
         #process vpg to hrv
         self.hrv_data = vpg_analyzer(self.vpg, self.fps)
-        print(self.hrv_data)
         
         #kill codec
         video.release()

@@ -177,25 +177,20 @@ class MainWindow(QMainWindow):
 
         self.all_pages.video_capture_page.th.setCurrentFileName(self.all_pages.video_capture_page.current_file_name)
         self.all_pages.video_capture_page.th.start()
-        print("тред запущен из мжйна")
-
 
     @Slot()
     def recall_thread_data(self):
-
-        print('i wanna recall knowledge')
         
         self.current_video = self.all_pages.video_capture_page.th.video.copy()
-        self.current_vpg = self.all_pages.video_capture_page.th.hrv_data.copy()
+        self.current_hrv = self.all_pages.video_capture_page.th.hrv_data.copy()
         self.current_mimic_data = self.all_pages.video_capture_page.th.mimic_data.copy()
 
         self.all_pages.video_capture_page.videoLabel.setPixmap(QPixmap.fromImage(self.all_pages.video_capture_page.placeholder))
 
         self.tune_video_widgets()
-        #self.all_pages.heart_rate_variability_page.setHRPlot(self.current_vpg)
-        self.all_pages.heart_rate_variability_page.setHRPlot([None, None, 1, 2, 3])
-        self.all_pages.heart_rate_variability_page.setSDANNPlot([None, None, 1, 2, 3])
-        self.all_pages.heart_rate_variability_page.setRMSSDPlot([None, None, 1, 2, 3])
+        self.all_pages.heart_rate_variability_page.setHRPlot(self.current_hrv['hr'])
+        self.all_pages.heart_rate_variability_page.setSDANNPlot(self.current_hrv['sdann'])
+        self.all_pages.heart_rate_variability_page.setRMSSDPlot(self.current_hrv['rmssd'])
         self.all_pages.heart_rate_variability_page.updatePosition(0)
 
         self.all_pages.emotions_page.updateMimic(self.current_mimic_data[0])
@@ -205,8 +200,6 @@ class MainWindow(QMainWindow):
 
         self.all_pages.video_capture_page.start_registration_button.setEnabled(True)
         self.all_pages.video_capture_page.stop_registration_button.setEnabled(False)
-
-        print("мы справились, мы уронили, но из мейnа")
 
     def prepare_vpg(self):
         
