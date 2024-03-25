@@ -14,63 +14,7 @@ from gui.img_processing import process_img
 from Frame_handler_VPG.FrameHandlerVPG import FrameHandlerVPG
 from Frame_handler.FrameHandlerMimic import FrameHandlerMimic
 from Mimic_Analyzer.MimicAnalyzer import MimicAnalyzer
-
-class Thread(QThread):
-    updateFrame = Signal(QImage)
-
-    def __init__(self, parent=None):
-        QThread.__init__(self, parent)
-        self.status = True
-        self.cap = True
-        self.path = 'Data/'
-        self.current_file_name = 'temp'
-        self.fps = 0
-        self.video = []
-
-    def run(self):
-        self.cap = cv2.VideoCapture(0)
-        
-        frame_width = int(self.cap.get(3))
-        frame_height = int(self.cap.get(4))
-        self.fps = self.cap.get(cv2.CAP_PROP_FPS)
-        
-        path = os.path.join(self.path, self.current_file_name + '/')
-        
-        self.frame_handler = FrameHandlerVPG(os.path.join(path, 'vpg.json'))
-        self.frame_handler.start()
-        
-        self.mimic_frame_handler = FrameHandlerMimic(os.path.join(path, 'mimic.json'))
-        self.mimic_frame_handler.start()
-        
-        try:
-            os.mkdir(path)
-        except:
-            pass
-        path = os.path.join(path, self.current_file_name + '.avi')
-        video = cv2.VideoWriter(path, cv2.VideoWriter_fourcc('M', 'J', 'P', 'G'), self.fps, (frame_width, frame_height))
-        
-        while self.status:
-            ret, frame = self.cap.read()
-            if not ret:
-                continue
-            
-            self.frame_handler.push(frame)
-            self.mimic_frame_handler.push(frame)
-            
-            self.video.append(frame)
-            
-            video.write(frame)
-            
-            scaled_img = process_img(frame)
-            # Emit signal
-            self.updateFrame.emit(scaled_img)
-        
-        video.release()
-        sys.exit(-1)
-        
-    def setCurrentFileName(self, current_name):
-        if current_name:
-            self.current_file_name = current_name
+from gui.thread import Thread
 
 class Video_capture_page(QWidget):
     
@@ -123,38 +67,38 @@ class Video_capture_page(QWidget):
         #main widget layout 
         self.setLayout(self.horizontal_layout)
         
-        #init thread
-        self.th = Thread(self)
-        
         #connections
-        self.start_registration_button.clicked.connect(self.start)
-        # self.stop_registration_button.clicked.connect(self.kill_thread)
+        # self.start_registration_button.clicked.connect(self.start)
+        self.stop_registration_button.clicked.connect(self.stop_registration)
         self.stop_registration_button.setEnabled(False)
-        self.th.updateFrame.connect(self.setImage)
         self.inputLine.editingFinished.connect(self.set_file_name)
 
-    def kill_thread(self):
-        # print("Finishing...")
-        self.status = False
-        handler = self.th.frame_handler
-        mimic_handler = self.th.mimic_frame_handler
+    def stop_registration(self):
+        #stop registration
+        self.th.status = False
+
+        print('reg stoped')
+             
         self.th.cap.release()
         cv2.destroyAllWindows()
+        
         self.current_video = self.th.video.copy()
+        
         self.stop_registration_button.setEnabled(False)
-        self.start_registration_button.setEnabled(True)                         
-        self.th.terminate()
+        self.start_registration_button.setEnabled(False)    
+                     
+        #self.th.terminate()
+        
         self.videoLabel.setPixmap(QPixmap.fromImage(self.placeholder))
         # Give time for the thread to finish
-        time.sleep(1)
-        handler.finish()
-        mimic_handler.finish()
-        self.current_vpg = handler.join()
-        self.current_mimic = mimic_handler.join()        
+        #time.sleep(1)
 
     @Slot()
     def start(self):
-        # print("Starting...")
+        #init thread
+        self.th = Thread(self)
+        self.th.updateFrame.connect(self.setImage)
+        
         self.stop_registration_button.setEnabled(True)
         self.start_registration_button.setEnabled(False)
         self.th.setCurrentFileName(self.current_file_name)

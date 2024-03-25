@@ -2,6 +2,7 @@ import os
 import sys
 
 import pyqtgraph as pg
+import numpy as np
 import cv2
 from PySide6.QtCore import Qt, Slot
 from PySide6.QtGui import QAction, QImage, QKeySequence, QPixmap, QResizeEvent
@@ -56,7 +57,7 @@ class Heart_rate_variability_page(QWidget):
         #init graph and lines for heart rate
         self.hr_plot_widget = pg.PlotWidget()
         self.hr_plot_widget.setBackground("w")
-        self.hr_plot_widget.setTitle("В данный момент впг", color="b", size="12pt")
+        self.hr_plot_widget.setTitle("В данный момент чсс если повезёт", color="b", size="12pt")
         self.hr_frames = []
         self.hr_values = []
         self.hr_indicator_position = 0
@@ -68,13 +69,39 @@ class Heart_rate_variability_page(QWidget):
             x=self.hr_indicator_position,
             pen=self.green_pen)
         
+        #init graph and lines for sdann
+        self.sdann_plot_widget = pg.PlotWidget()
+        self.sdann_plot_widget.setBackground("w")
+        self.sdann_plot_widget.setTitle("В данный момент sdann", color="b", size="12pt")
+        self.sdann_frames = []
+        self.sdann_values = []
+        self.sdann_indicator_position = 0
+        self.sdann_line = self.sdann_plot_widget.plot(
+            self.sdann_frames,
+            self.sdann_values,
+            pen=self.blue_pen)
+        self.sdann_indicator = self.sdann_plot_widget.addLine(
+            x=self.sdann_indicator_position,
+            pen=self.green_pen)
         
-        self.plot_widget_2 = pg.PlotWidget()
-        self.plot_widget_3 = pg.PlotWidget()
+        #init graph and lines for rmssd
+        self.rmssd_plot_widget = pg.PlotWidget()
+        self.rmssd_plot_widget.setBackground("w")
+        self.rmssd_plot_widget.setTitle("В данный момент rmssd", color="b", size="12pt")
+        self.rmssd_frames = []
+        self.rmssd_values = []
+        self.rmssd_indicator_position = 0
+        self.rmssd_line = self.rmssd_plot_widget.plot(
+            self.rmssd_frames,
+            self.rmssd_values,
+            pen=self.blue_pen)
+        self.rmssd_indicator = self.rmssd_plot_widget.addLine(
+            x=self.rmssd_indicator_position,
+            pen=self.green_pen)
         
         self.right_vertical_layout.addWidget(self.hr_plot_widget)
-        self.right_vertical_layout.addWidget(self.plot_widget_2)
-        self.right_vertical_layout.addWidget(self.plot_widget_3)
+        self.right_vertical_layout.addWidget(self.sdann_plot_widget)
+        self.right_vertical_layout.addWidget(self.rmssd_plot_widget)
         
         self.horizontal_layout = QHBoxLayout()
         
@@ -94,17 +121,60 @@ class Heart_rate_variability_page(QWidget):
     def process_video(self):
         pass
         
-    def setPosition(self, position):
-        print(position)
+    def updatePosition(self, position):
+        self.position = position
+
+        self.hr_indicator.setValue(self.position)
+        self.sdann_indicator.setValue(self.position)
+        self.rmssd_indicator.setValue(self.position)
         
-    def updateHRPlot(self, hr_frames, hr_vals):
-        self.hr_frames = hr_frames
-        self.hr_values = hr_vals
+    def setHRPlot(self, hr_vals):
+        frames, vals = self.process_raw_data(hr_vals)
+
+        self.hr_frames = frames
+        self.hr_values = vals
         self.hr_line.setData(self.hr_frames, self.hr_values)
+
+    def setSDANNPlot(self, sdann_vals):
+        frames, vals = self.process_raw_data(sdann_vals)
+
+        self.sdann_frames = frames
+        self.sdann_values = vals
+        self.sdann_line.setData(self.sdann_frames, self.sdann_values)
+
+    def setRMSSDPlot(self, rmssd_vals):
+        frames, vals = self.process_raw_data(rmssd_vals)
+
+        self.rmssd_frames = frames
+        self.rmssd_values = vals
+        self.rmssd_line.setData(self.rmssd_frames, self.rmssd_values)
         
     def updateHRIndicator(self, position):
         self.hr_indicator_position = position
         self.hr_indicator.setValue(self.hr_indicator_position)
+
+    def updateSDANNIndicator(self, position):
+        self.sdann_indicator_position = position
+        self.sdann_indicator.setValue(self.sdann_indicator_position)
+
+    def updateRMSSDIndicator(self, position):
+        self.hr_indicator_position = position
+        self.hr_indicator.setValue(self.hr_indicator_position)
+
+    def process_raw_data(self, raw_values):
+        frames, vals = [0], [0]
+
+        first_not_none_element = 0
+        for i in range(len(raw_values)):
+            if raw_values[i] != None:
+                first_not_none_element = i
+                break
+            
+        frames = np.arange(first_not_none_element, len(raw_values))
+        vals = raw_values[first_not_none_element:]
+
+        return frames, vals
+
         
  
 if __name__ == "__main__":
