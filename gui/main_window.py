@@ -1,4 +1,3 @@
-import os
 import sys
 import time
 
@@ -14,8 +13,8 @@ from PySide6.QtWidgets import (QApplication, QComboBox, QGroupBox,
 
 from gui.all_pages_widget import All_pages
 from gui.main_menu_widget import Main_menu
+from gui.thread import Thread
 from gui.img_processing import process_img
-from gui.video_capture_widget import Thread
 
 
 def read_video(path):
@@ -72,6 +71,7 @@ class MainWindow(QMainWindow):
         self.all_pages.emotions_page.loadButton.clicked.connect(self.open_video)
         self.all_pages.heart_rate_variability_page.positionSlider.sliderMoved.connect(self.setPositionHRV)
         self.all_pages.emotions_page.positionSlider.sliderMoved.connect(self.setPositionEmo)
+        # self.all_pages.video_capture_page.th.finished.connect(self.kill_thread)
         self.all_pages.video_capture_page.start_registration_button.clicked.connect(self.start_registration)
         
         #init variables
@@ -155,45 +155,59 @@ class MainWindow(QMainWindow):
         self.all_pages.heart_rate_variability_page.videoLabel.setPixmap(QPixmap.fromImage(process_img(self.current_video[position])))
         self.all_pages.emotions_page.videoLabel.setPixmap(QPixmap.fromImage(process_img(self.current_video[position])))
         self.all_pages.emotions_page.positionSlider.setSliderPosition(position)
-        self.all_pages.heart_rate_variability_page.updateHRIndicator(position)
+        self.all_pages.heart_rate_variability_page.updatePosition(position)
         self.all_pages.emotions_page.updateMimic(self.current_mimic_data[position])
         
     def setPositionEmo(self, position):
         self.all_pages.heart_rate_variability_page.videoLabel.setPixmap(QPixmap.fromImage(process_img(self.current_video[position])))
         self.all_pages.emotions_page.videoLabel.setPixmap(QPixmap.fromImage(process_img(self.current_video[position])))
         self.all_pages.heart_rate_variability_page.positionSlider.setSliderPosition(position)
-        self.all_pages.heart_rate_variability_page.updateHRIndicator(position)
+        self.all_pages.heart_rate_variability_page.updatePosition(position)
         self.all_pages.emotions_page.updateMimic(self.current_mimic_data[position])
-        
-    def start_registration(self):
-        self.all_pages.video_capture_page.th = Thread(self)
-        self.all_pages.video_capture_page.th.finished.connect(self.kill_thread)
-        self.all_pages.video_capture_page.th.updateFrame.connect(self.all_pages.video_capture_page.setImage)
-        self.all_pages.video_capture_page.start()
-        
     
     @Slot()
-    def kill_thread(self):
+    def start_registration(self):
+        #init thread here to necessary connections
+        self.all_pages.video_capture_page.th = Thread()
+        self.all_pages.video_capture_page.th.updateFrame.connect(self.all_pages.video_capture_page.setImage)
+        self.all_pages.video_capture_page.th.finished.connect(self.recall_thread_data)
+
+        self.all_pages.video_capture_page.start_registration_button.setEnabled(False)
+        self.all_pages.video_capture_page.stop_registration_button.setEnabled(True)
+
+        self.all_pages.video_capture_page.th.setCurrentFileName(self.all_pages.video_capture_page.current_file_name)
+        self.all_pages.video_capture_page.th.start()
+        print("тред запущен из мжйна")
+
+
+    @Slot()
+    def recall_thread_data(self):
+
+        print('i wanna recall knowledge')
         
-        print('where my vpg')
-        
-        self.current_video = self.all_pages.video_capture_page.current_video.copy()
-        self.all_pages.video_capture_page.current_video = []
-        self.current_vpg = self.all_pages.video_capture_page.th.current_vpg.copy()
-        self.current_mimic_data = self.all_pages.video_capture_page.th.current_mimic.copy()
-        
-        self.all_pages.video_capture_page.th.terminate()
-        print('thread gonna sleep for eternity')
-        # Give time for the thread to finish
-        time.sleep(1)
-        
+        self.current_video = self.all_pages.video_capture_page.th.video.copy()
+        self.current_vpg = self.all_pages.video_capture_page.th.hrv_data.copy()
+        self.current_mimic_data = self.all_pages.video_capture_page.th.mimic_data.copy()
+
+        self.all_pages.video_capture_page.videoLabel.setPixmap(QPixmap.fromImage(self.all_pages.video_capture_page.placeholder))
+
         self.tune_video_widgets()
-        self.prepare_vpg()
-        self.all_pages.heart_rate_variability_page.updateHRPlot(self.current_vpg_frames,
-                                                                self.current_vpg)
-        self.all_pages.heart_rate_variability_page.updateHRIndicator(0)
+        #self.all_pages.heart_rate_variability_page.setHRPlot(self.current_vpg)
+        self.all_pages.heart_rate_variability_page.setHRPlot([None, None, 1, 2, 3])
+        self.all_pages.heart_rate_variability_page.setSDANNPlot([None, None, 1, 2, 3])
+        self.all_pages.heart_rate_variability_page.setRMSSDPlot([None, None, 1, 2, 3])
+        self.all_pages.heart_rate_variability_page.updatePosition(0)
+
         self.all_pages.emotions_page.updateMimic(self.current_mimic_data[0])
         
+        self.all_pages.video_capture_page.th.terminate()
+        time.sleep(1)
+
+        self.all_pages.video_capture_page.start_registration_button.setEnabled(True)
+        self.all_pages.video_capture_page.stop_registration_button.setEnabled(False)
+
+        print("мы справились, мы уронили, но из мейnа")
+
     def prepare_vpg(self):
         
         enter_seq = False
