@@ -1,6 +1,8 @@
 import sys
 import time
 
+import json
+
 import cv2, numpy as np
 from PySide6.QtCore import Qt, Slot, QSize
 from PySide6.QtGui import QScreen, QPixmap
@@ -143,9 +145,21 @@ class MainWindow(QMainWindow):
         self.all_pages.emotions_page.status_label.setText("Видео загружается")
         
         self.current_video_path = filename
+        mimic_path = filename.split("/")
+        mimic_path[-1] = 'mimic.json'
+        mimic_path = '/'.join(mimic_path)
+        hrv_path = filename.split("/")
+        hrv_path[-1] = 'hrv.json'
+        hrv_path = '/'.join(hrv_path)
         try: 
             self.current_video, self.current_video_fps = read_video(filename)
+            with open(mimic_path, 'r') as file:
+                self.current_mimic_data = json.load(file)
+            with open(hrv_path, 'r') as file:
+                self.current_hrv = json.load(file)
             self.tune_video_widgets()
+            self.tune_graphs()
+            self.all_pages.emotions_page.updateMimic(self.current_mimic_data[0])
             
         except:
             self.all_pages.heart_rate_variability_page.status_label.setText("Что-то пошло не так")
@@ -188,10 +202,7 @@ class MainWindow(QMainWindow):
         self.all_pages.video_capture_page.videoLabel.setPixmap(QPixmap.fromImage(self.all_pages.video_capture_page.placeholder))
 
         self.tune_video_widgets()
-        self.all_pages.heart_rate_variability_page.setHRPlot(self.current_hrv['hr'])
-        self.all_pages.heart_rate_variability_page.setSDANNPlot(self.current_hrv['sdann'])
-        self.all_pages.heart_rate_variability_page.setRMSSDPlot(self.current_hrv['rmssd'])
-        self.all_pages.heart_rate_variability_page.updatePosition(0)
+        self.tune_graphs()
 
         self.all_pages.emotions_page.updateMimic(self.current_mimic_data[0])
         
@@ -200,23 +211,6 @@ class MainWindow(QMainWindow):
 
         self.all_pages.video_capture_page.start_registration_button.setEnabled(True)
         self.all_pages.video_capture_page.stop_registration_button.setEnabled(False)
-
-    def prepare_vpg(self):
-        
-        enter_seq = False
-        
-        for i in range(len(self.current_vpg)):
-            
-            if not enter_seq and self.current_vpg[i] != None:
-                self.current_vpg_start_frame = i
-                enter_seq = True
-                
-            if enter_seq and self.current_vpg[i] == None or i == len(self.current_vpg)-1:
-                self.current_vpg_end_frame = i
-                break
-            
-        self.current_vpg = self.current_vpg[self.current_vpg_start_frame:self.current_vpg_end_frame]
-        self.current_vpg_frames = [i for i in range(self.current_vpg_start_frame, self.current_vpg_end_frame)]
         
     def tune_video_widgets(self):
         
@@ -235,6 +229,13 @@ class MainWindow(QMainWindow):
         self.all_pages.emotions_page.positionSlider.setMaximum(len(self.current_video)-1)
         self.all_pages.emotions_page.positionSlider.setSliderPosition(0)
         self.all_pages.emotions_page.positionSlider.setEnabled(True)
+
+    def tune_graphs(self):
+
+        self.all_pages.heart_rate_variability_page.setHRPlot(self.current_hrv['hr'])
+        self.all_pages.heart_rate_variability_page.setSDANNPlot(self.current_hrv['sdann'])
+        self.all_pages.heart_rate_variability_page.setRMSSDPlot(self.current_hrv['rmssd'])
+        self.all_pages.heart_rate_variability_page.updatePosition(0)
         
             
         

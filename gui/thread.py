@@ -34,6 +34,7 @@ class Thread(QThread):
         
         #init path for saving results of image processing
         path = os.path.join(self.path, self.current_file_name + '/')
+        path1 = path
         
         #init and start handler for hrv
         self.frame_handler = FrameHandlerVPG(os.path.join(path, 'vpg.json'))
@@ -73,9 +74,11 @@ class Thread(QThread):
         self.mimic_frame_handler.finish()
         self.vpg = self.frame_handler.join()
         self.mimic_data = self.mimic_frame_handler.join()
+
+        print(path + '/hrv.json')
         
         #process vpg to hrv
-        self.hrv_data = vpg_analyzer(self.vpg, self.fps)
+        self.hrv_data = vpg_analyzer(self.vpg, self.fps, path1 + '/hrv.json')
         
         #kill codec
         video.release()

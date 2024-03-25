@@ -1,10 +1,11 @@
 from VPG_Analyzer.VPGAnalyzer import VPGAnalyzer
 import numpy as np
+import json
 
-def vpg_analyzer(vpg, fps):
-    vpg_sample_analyzer = VPGAnalyzer()
+def vpg_analyzer(vpg, fps, path):
+    vpg_analyzer = VPGAnalyzer()
 
-    # Избавление от кадров без лица
+        # Избавление от кадров без лица
     for i in range(len(vpg)):
         if vpg[i] is None:
             if i == 0:
@@ -16,33 +17,18 @@ def vpg_analyzer(vpg, fps):
     vpg = (vpg - np.mean(vpg)) / np.std(vpg)
 
     # Фильтрация
-    vpg_filt = vpg_sample_analyzer.filt(vpg, fps)
-
-    # length of window to hrv estimation
-    win_size = int(10 / fps)
-
-    if len(vpg) <= win_size:
-
-        return 0
-    
-    hrv = {"hr": [None] * (win_size - 1), "sdann": [None] * (win_size - 1), "rmssd": [None] * (win_size - 1), "nn50": [None] * (win_size - 1)}
-    
-    for i in range(len(vpg) - win_size):
-
-        hrv["hr"].append(vpg_sample_analyzer.get_hr_peak(vpg_filt[i:i+win_size], fps))
-        peaks = vpg_sample_analyzer.find_peaks(vpg_filt[i:i+win_size])
-        hrv["sdann"].append(vpg_sample_analyzer.sdann(peaks, fps))
-        hrv["rmssd"].append(vpg_sample_analyzer.rmssd(peaks, fps))
-        hrv["nn50"].append(vpg_sample_analyzer.nn50(peaks, fps))
-
-    print(len(hrv['hr']), len(vpg))
-
-    return hrv
+    vpg_filt = vpg_analyzer.filt(vpg, fps)
 
     # Расчёт ЧСС
-    print(f'Длинна сигнала: {len(vpg)}')
-    print(f'ЧСС: {vpg_sample_analyzer.get_hr_peak(vpg_filt, fps)}')
-    peaks = vpg_sample_analyzer.find_peaks(vpg_filt)
-    print(f'SDANN: {vpg_sample_analyzer.sdann(peaks, fps)}')
-    print(f'RMSSD: {vpg_sample_analyzer.rmssd(peaks, fps)}')
-    print(f'NN50: {vpg_sample_analyzer.nn50(peaks, fps)}')
+    hr = vpg_analyzer.get_report_hr(vpg_filt, fps)
+
+    # Расчёт SDANN RMSSD NN50
+    peaks = vpg_analyzer.find_peaks(vpg_filt)
+
+    hrv = vpg_analyzer.get_report_hrv(vpg_filt, fps, 100)
+    hrv['hr'] = hr
+
+    with open(path, 'w') as file:
+        json.dump(hrv, file)
+
+    return hrv

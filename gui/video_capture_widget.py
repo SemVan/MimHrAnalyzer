@@ -41,17 +41,14 @@ class Video_capture_page(QWidget):
         self.left_vertical_layout.addWidget(self.inputLine)
         
         #info text label
-        self.label = QLabel("приложение напомнит вам,\n"
-                            "что что-то не так (если не сдохнет),\n"
-                            "если не дождаться возвращения плейсхолдера\n"
-                            "после окончания записи видео\n\n"
-                            "я пока думаю над решением")
+        self.label = QLabel("Для работы вам необходимо\n"
+                            "загрузить видео или записать его")
         #self.label.setFixedSize(640, 640)
         self.label.setAlignment(Qt.AlignCenter)
         
         #registrate buttons
-        self.start_registration_button = QPushButton("начать запись")
-        self.stop_registration_button = QPushButton("закончить запись")
+        self.start_registration_button = QPushButton("Начать запись")
+        self.stop_registration_button = QPushButton("Закончить запись")
 
         #right vertical layout
         self.right_vertical_layout = QVBoxLayout()
@@ -90,17 +87,6 @@ class Video_capture_page(QWidget):
         self.videoLabel.setPixmap(QPixmap.fromImage(self.placeholder))
         # Give time for the thread to finish
         #time.sleep(1)
-
-    @Slot()
-    def start(self):
-        #init thread
-        self.th = Thread(self)
-        self.th.updateFrame.connect(self.setImage)
-        
-        self.stop_registration_button.setEnabled(True)
-        self.start_registration_button.setEnabled(False)
-        self.th.setCurrentFileName(self.current_file_name)
-        self.th.start()
 
     @Slot(QImage)
     def setImage(self, image):

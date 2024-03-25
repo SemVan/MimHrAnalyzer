@@ -133,6 +133,7 @@ class Heart_rate_variability_page(QWidget):
 
         self.hr_frames = frames
         self.hr_values = vals
+        self.hr_plot_widget.setXRange(self.hr_frames[0], self.hr_frames[-1])
         self.hr_line.setData(self.hr_frames, self.hr_values)
 
     def setSDANNPlot(self, sdann_vals):
@@ -140,6 +141,7 @@ class Heart_rate_variability_page(QWidget):
 
         self.sdann_frames = frames
         self.sdann_values = vals
+        self.sdann_plot_widget.setXRange(self.sdann_frames[0], self.sdann_frames[-1])
         self.sdann_line.setData(self.sdann_frames, self.sdann_values)
 
     def setRMSSDPlot(self, rmssd_vals):
@@ -147,6 +149,7 @@ class Heart_rate_variability_page(QWidget):
 
         self.rmssd_frames = frames
         self.rmssd_values = vals
+        self.rmssd_plot_widget.setXRange(self.rmssd_frames[0], self.rmssd_frames[-1])
         self.rmssd_line.setData(self.rmssd_frames, self.rmssd_values)
         
     def updateHRIndicator(self, position):
