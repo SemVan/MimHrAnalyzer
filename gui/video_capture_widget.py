@@ -30,10 +30,12 @@ class Video_capture_page(QWidget):
         self.videoLabel = QLabel()
         self.videoLabel.setFixedSize(640, 480)
         self.videoLabel.setPixmap(QPixmap.fromImage(self.placeholder))
+        self.videoLabel.setAlignment(Qt.AlignCenter)
         
         #input for file name
         self.inputLine = QLineEdit()
-        self.inputLine.setPlaceholderText("Введите название файла")
+        self.inputLine.setPlaceholderText("Введите название файла, под которым будет сохранено видео")
+        self.inputLine.setStyleSheet("font-family : ALS Sector;")
         
         #left vertical layout
         self.left_vertical_layout = QVBoxLayout()
@@ -42,17 +44,28 @@ class Video_capture_page(QWidget):
         
         #info text label
         self.label = QLabel("Для работы вам необходимо\n"
-                            "загрузить видео или записать его")
-        #self.label.setFixedSize(640, 640)
+                            "загрузить видео или записать его\n\n"
+                            "Не забудьте назвать видео")
+        self.label.setStyleSheet("font-family : ALS Sector;" 
+                                 "color : black;")
+        self.label.setMinimumWidth(480)
         self.label.setAlignment(Qt.AlignCenter)
         
         #registrate buttons
+        self.load_button = QPushButton("Загрузить видео")
+        self.load_button.setStyleSheet("font-family : ALS Sector;" 
+                                 "color : black;")
         self.start_registration_button = QPushButton("Начать запись")
+        self.start_registration_button.setStyleSheet("font-family : ALS Sector;" 
+                                 "color : black;")
         self.stop_registration_button = QPushButton("Закончить запись")
+        self.stop_registration_button.setStyleSheet("font-family : ALS Sector;" 
+                                 "color : black;")
 
         #right vertical layout
         self.right_vertical_layout = QVBoxLayout()
         self.right_vertical_layout.addWidget(self.label)
+        self.right_vertical_layout.addWidget(self.load_button)
         self.right_vertical_layout.addWidget(self.start_registration_button)
         self.right_vertical_layout.addWidget(self.stop_registration_button)
     

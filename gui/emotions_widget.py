@@ -26,6 +26,7 @@ class Emotions_page(QWidget):
         self.videoLabel = QLabel()
         self.videoLabel.setFixedSize(640, 480)
         self.videoLabel.setPixmap(QPixmap.fromImage(self.placeholder))
+        self.videoLabel.setAlignment(Qt.AlignCenter)
         
         #position slider
         self.positionSlider = QSlider(Qt.Horizontal)
@@ -33,12 +34,16 @@ class Emotions_page(QWidget):
         
         #info labels
         self.path_label = QLabel("Видео не выбрано")
+        self.path_label.setStyleSheet("font-family : ALS Sector;" 
+                                      "color : black;")
         self.status_label = QLabel("Для продолжения работы запишите или выберите ввидео")
+        self.status_label.setStyleSheet("font-family : ALS Sector;" 
+                                      "color : black;")
         
         #buttons under video
-        self.loadButton = QPushButton("load video")
-        self.processButton = QPushButton("process video")
-        self.button3 = QPushButton("cry about it")
+        self.loadButton = QPushButton("Загрузить видео")
+        self.loadButton.setStyleSheet("font-family : ALS Sector;" 
+                                      "color : black;")
         
         #build left vertical layout
         self.left_vertical_layout.addWidget(self.videoLabel)
@@ -46,19 +51,28 @@ class Emotions_page(QWidget):
         self.left_vertical_layout.addWidget(self.path_label)
         self.left_vertical_layout.addWidget(self.status_label)
         self.left_vertical_layout.addWidget(self.loadButton)
-        self.left_vertical_layout.addWidget(self.processButton)
-        self.left_vertical_layout.addWidget(self.button3)
         
         #group model of emotions progress bars
-        self.emotions_group_model = QGroupBox("Emotions")
+        self.emotions_group_model = QGroupBox("Эмоции/состояние")
+        self.emotions_group_model.setStyleSheet("font-family : ALS Sector;" 
+                                                "font: bold;"
+                                                "color : black;")
         self.emotions_group_model.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Expanding)
         
         self.emotions_group_model_layout = QVBoxLayout()
+
+        self.expression_names = ['Нейтральное', 'Радость', 'Грусть', 'Удивление',
+                                 'Страх', 'Отвращение', 'Злость', 'Презрение']
         
         self.emotions_progress_bars = []
         self.emotions_labels = []
         for i in range(8):
-            self.emotions_labels.append(QLabel("emotion "+str(i)))
+            self.emotions_labels.append(QLabel(self.expression_names[i]))
+            self.emotions_labels[i].setFixedWidth(90)
+            self.emotions_labels[i].setAlignment(Qt.AlignCenter)
+            self.emotions_labels[i].setStyleSheet("font-family : ALS Sector;" 
+                                                  "font: normal;"
+                                                  "color : black;")
             self.emotions_progress_bars.append(QProgressBar())
             layout = QHBoxLayout()
             layout.addWidget(self.emotions_labels[i])
@@ -69,9 +83,14 @@ class Emotions_page(QWidget):
         self.emotions_group_model.setLayout(self.emotions_group_model_layout)
         
         #group model of movment progress bars
-        self.movement_group_model = QGroupBox("Movement")
+        self.movement_group_model = QGroupBox("Интенсивность двигательных единиц")
+        self.movement_group_model.setStyleSheet("font-family : ALS Sector;" 
+                                                "font: bold;"
+                                                "color : black;")
         self.movement_group_model.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Expanding)
         self.horizontal_movement_group_model_layout = QHBoxLayout()
+
+        self.intensity_au_names = ['1', '2', '4', '5', '6', '9', '12', '15', '17', '20', '25', '26']
         
         self.left_movement_group_model_layout = QVBoxLayout()
         self.right_movement_group_model_layout = QVBoxLayout()
@@ -79,7 +98,12 @@ class Emotions_page(QWidget):
         self.movement_progress_bars = []
         self.movement_labels = []
         for i in range(12):
-            self.movement_labels.append(QLabel("mov "+str(i)))
+            self.movement_labels.append(QLabel("ДЕ "+self.intensity_au_names[i]))
+            self.movement_labels[i].setFixedWidth(40)
+            self.movement_labels[i].setAlignment(Qt.AlignCenter)
+            self.movement_labels[i].setStyleSheet("font-family : ALS Sector;" 
+                                                  "font: normal;"
+                                                  "color : black;")
             self.movement_progress_bars.append(QProgressBar())
             layout = QHBoxLayout()
             layout.addWidget(self.movement_labels[i])
@@ -95,18 +119,28 @@ class Emotions_page(QWidget):
         self.movement_group_model.setLayout(self.horizontal_movement_group_model_layout)
         
         #group model of movement checkboxes
-        self.checkbox_group_model = QGroupBox("checkbox")
+        self.checkbox_group_model = QGroupBox("Наличие двигательных единиц")
+        self.checkbox_group_model.setStyleSheet("font-family : ALS Sector;" 
+                                                "font: bold;"
+                                                "color : black;")
         self.checkbox_group_model.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Expanding)
         self.horizontal_checkbox_group_model_layout = QHBoxLayout()
         
         self.left_checkbox_group_model_layout = QVBoxLayout()
         self.right_checkbox_group_model_layout = QVBoxLayout()
+
+        self.presence_au_names = ['1', '2', '4', '6', '7', '10', '12', '14', '15', '17', '23', '24']
         
         self.checkbox_progress_bars = []
         self.checkbox_labels = []
         for i in range(12):
             self.checkbox_progress_bars.append(QCheckBox())
-            self.checkbox_labels.append(QLabel('movement ' + str(i)))
+            self.checkbox_labels.append(QLabel('ДЕ ' + self.presence_au_names[i]))
+            self.checkbox_labels[i].setFixedWidth(150)
+            self.checkbox_labels[i].setAlignment(Qt.AlignCenter)
+            self.checkbox_labels[i].setStyleSheet("font-family : ALS Sector;" 
+                                                  "font: normal;"
+                                                  "color : black;")
             layout = QHBoxLayout()
             layout.addWidget(self.checkbox_labels[i])
             layout.addWidget(self.checkbox_progress_bars[i])

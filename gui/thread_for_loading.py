@@ -23,13 +23,11 @@ class Thread_Loading(QThread):
     #thread main process
     def run(self):
         #get camera and parametrs
-        print(self.video_path)
         self.cap = cv2.VideoCapture(self.video_path)        
         self.fps = self.cap.get(cv2.CAP_PROP_FPS)
         
         #init path for saving results of image processing
         path = os.path.split(self.video_path)[0] + '/'
-        print(path)
         
         #init and start handler for hrv
         self.frame_handler = FrameHandlerVPG(os.path.join(path, 'vpg.json'))
@@ -62,4 +60,4 @@ class Thread_Loading(QThread):
 
     def setCurrentFileName(self, current_name):
         if current_name:
-            self.current_file_name = current_name
+            self.video_path = current_name

@@ -24,12 +24,15 @@ class Main_menu(QWidget):
                 
         self.video_button.setEnabled(False)
         
-        self.video_button.setStyleSheet("font-family : ALS Sector;"
+        self.video_button.setStyleSheet("font-family : ALS Sector;" 
+                                        "font: bold;"
                                         "background-color : #006cdc;"  
                                         "color : black;")
         self.hrv_button.setStyleSheet("font-family : ALS Sector;"
+                                      "font: bold;"
                                       "background-color : #00b8ff;")
         self.emotions_button.setStyleSheet("font-family : ALS Sector;"
+                                           "font: bold;"
                                            "background-color : #00b8ff")
 
         

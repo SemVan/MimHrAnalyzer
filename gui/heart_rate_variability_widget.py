@@ -25,6 +25,7 @@ class Heart_rate_variability_page(QWidget):
         self.videoLabel = QLabel()
         self.videoLabel.setFixedSize(640, 480)
         self.videoLabel.setPixmap(QPixmap.fromImage(self.placeholder))
+        self.videoLabel.setAlignment(Qt.AlignCenter)
         
         #position slider
         self.positionSlider = QSlider(Qt.Horizontal)
@@ -32,12 +33,16 @@ class Heart_rate_variability_page(QWidget):
         
         #info labels
         self.path_label = QLabel("Видео не выбрано")
+        self.path_label.setStyleSheet("font-family : ALS Sector;" 
+                                      "color : black;")
         self.status_label = QLabel("Для продолжения работы запишите или выберите ввидео")
+        self.status_label.setStyleSheet("font-family : ALS Sector;" 
+                                      "color : black;")
         
         #buttons under video
-        self.loadButton = QPushButton("load video")
-        self.processButton = QPushButton("process video")
-        self.button3 = QPushButton("cry about it")
+        self.loadButton = QPushButton("Загрузить видео")
+        self.loadButton.setStyleSheet("font-family : ALS Sector;" 
+                                 "color : black;")
 
         #build left vertical layout
         self.left_vertical_layout.addWidget(self.videoLabel)
@@ -45,8 +50,6 @@ class Heart_rate_variability_page(QWidget):
         self.left_vertical_layout.addWidget(self.path_label)
         self.left_vertical_layout.addWidget(self.status_label)
         self.left_vertical_layout.addWidget(self.loadButton)
-        self.left_vertical_layout.addWidget(self.processButton)
-        self.left_vertical_layout.addWidget(self.button3)
         
         self.right_vertical_layout = QVBoxLayout()
         
@@ -57,7 +60,8 @@ class Heart_rate_variability_page(QWidget):
         #init graph and lines for heart rate
         self.hr_plot_widget = pg.PlotWidget()
         self.hr_plot_widget.setBackground("w")
-        self.hr_plot_widget.setTitle("В данный момент чсс если повезёт", color="b", size="12pt")
+        self.hr_plot_widget.setTitle("График ЧСС от номера кадра", color="b", 
+                                     size="12pt", family="ASL Sector")
         self.hr_frames = []
         self.hr_values = []
         self.hr_indicator_position = 0
@@ -72,7 +76,8 @@ class Heart_rate_variability_page(QWidget):
         #init graph and lines for sdann
         self.sdann_plot_widget = pg.PlotWidget()
         self.sdann_plot_widget.setBackground("w")
-        self.sdann_plot_widget.setTitle("В данный момент sdann", color="b", size="12pt")
+        self.sdann_plot_widget.setTitle("График SDANN от номера кадра", color="b", 
+                                        size="12pt", family="ASL Sector")
         self.sdann_frames = []
         self.sdann_values = []
         self.sdann_indicator_position = 0
@@ -87,7 +92,8 @@ class Heart_rate_variability_page(QWidget):
         #init graph and lines for rmssd
         self.rmssd_plot_widget = pg.PlotWidget()
         self.rmssd_plot_widget.setBackground("w")
-        self.rmssd_plot_widget.setTitle("В данный момент rmssd", color="b", size="12pt")
+        self.rmssd_plot_widget.setTitle("График RMSSD от номера кадра", color="b", 
+                                        size="12pt", family="ASL Sector")
         self.rmssd_frames = []
         self.rmssd_values = []
         self.rmssd_indicator_position = 0

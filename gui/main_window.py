@@ -5,7 +5,7 @@ import json
 
 import cv2, numpy as np
 from PySide6.QtCore import Qt, Slot, QSize
-from PySide6.QtGui import QScreen, QPixmap
+from PySide6.QtGui import QScreen, QPixmap, QIcon
 from PySide6.QtWidgets import (QApplication, QComboBox, QGroupBox,
                                QHBoxLayout, QLabel, QMainWindow, QPushButton,
                                QSizePolicy, QVBoxLayout, QWidget, 
@@ -46,7 +46,8 @@ class MainWindow(QMainWindow):
         
         #set stylish things
         self.setStyleSheet("background-color : white;")
-        self.setWindowTitle("СПО_нейм")
+        self.setWindowTitle("Анализ ВСР и мимики")
+        #self.setWindowIcon(QIcon('Resources/bmstu.png'))
         
         #init file dialog window
         self.dialog = QFileDialog(self)
@@ -74,8 +75,8 @@ class MainWindow(QMainWindow):
         self.all_pages.emotions_page.loadButton.clicked.connect(self.open_video)
         self.all_pages.heart_rate_variability_page.positionSlider.sliderMoved.connect(self.setPositionHRV)
         self.all_pages.emotions_page.positionSlider.sliderMoved.connect(self.setPositionEmo)
-        # self.all_pages.video_capture_page.th.finished.connect(self.kill_thread)
         self.all_pages.video_capture_page.start_registration_button.clicked.connect(self.start_registration)
+        self.all_pages.video_capture_page.load_button.clicked.connect(self.open_video)
         
         #init variables
         self.current_video_path = ''
@@ -96,11 +97,14 @@ class MainWindow(QMainWindow):
         self.main_menu.emotions_button.setEnabled(True)
         
         self.main_menu.video_button.setStyleSheet("font-family : ALS Sector;"
+                                                  "font: bold;"
                                                   "background-color : #006cdc;"
                                                   "color : black")
         self.main_menu.hrv_button.setStyleSheet("font-family : ALS Sector;"
+                                                "font: bold;"
                                                 "background-color : #00b8ff")
         self.main_menu.emotions_button.setStyleSheet("font-family : ALS Sector;"
+                                                     "font: bold;"
                                                      "background-color : #00b8ff")
      
     @Slot()
@@ -112,11 +116,14 @@ class MainWindow(QMainWindow):
         self.main_menu.emotions_button.setEnabled(True)
         
         self.main_menu.video_button.setStyleSheet("font-family : ALS Sector;"
+                                                  "font: bold;"
                                                   "background-color : #00b8ff")
         self.main_menu.hrv_button.setStyleSheet("font-family : ALS Sector;"
+                                                "font: bold;"
                                                 "background-color : #006cdc;"
                                                 "color : black")
         self.main_menu.emotions_button.setStyleSheet("font-family : ALS Sector;"
+                                                     "font: bold;"
                                                      "background-color : #00b8ff")
      
     @Slot()
@@ -128,17 +135,22 @@ class MainWindow(QMainWindow):
         self.main_menu.emotions_button.setEnabled(False)
         
         self.main_menu.video_button.setStyleSheet("font-family : ALS Sector;"
+                                                  "font: bold;"
                                                   "background-color : #00b8ff")
         self.main_menu.hrv_button.setStyleSheet("font-family : ALS Sector;"
+                                                "font: bold;"
                                                 "background-color : #00b8ff")
         self.main_menu.emotions_button.setStyleSheet("font-family : ALS Sector;"
+                                                     "font: bold;"
                                                      "background-color : #006cdc;"
                                                      "color : black")
         
     @Slot()
     def open_video(self):
-        filename, filter = self.dialog.getOpenFileName(caption='Open file', dir='.', filter='*.avi')
         
+        filename, filter = self.dialog.getOpenFileName(caption='Open file', dir='.', filter='*.avi')
+        if filename == '': return 0
+         
         self.all_pages.heart_rate_variability_page.path_label.setText("Выбран файл " + filename.split("/")[-1].split(".")[0])
         self.all_pages.heart_rate_variability_page.status_label.setText("Видео загружается")
         
@@ -168,7 +180,7 @@ class MainWindow(QMainWindow):
                 self.all_pages.video_capture_page.th.finished.connect(self.recall_thread_data)
 
                 self.all_pages.video_capture_page.start_registration_button.setEnabled(False)
-                self.all_pages.video_capture_page.stop_registration_button.setEnabled(True)
+                self.all_pages.video_capture_page.stop_registration_button.setEnabled(False)
 
                 self.all_pages.video_capture_page.th.setCurrentFileName(self.current_video_path)
                 self.all_pages.video_capture_page.th.start()
@@ -218,8 +230,9 @@ class MainWindow(QMainWindow):
 
         self.all_pages.emotions_page.updateMimic(self.current_mimic_data[0])
         
-        self.all_pages.video_capture_page.th.terminate()
-        time.sleep(1)
+        if self.all_pages.video_capture_page.th:
+            self.all_pages.video_capture_page.th.terminate()
+            time.sleep(1)
 
         self.all_pages.video_capture_page.start_registration_button.setEnabled(True)
         self.all_pages.video_capture_page.stop_registration_button.setEnabled(False)
