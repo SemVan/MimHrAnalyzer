@@ -16,6 +16,7 @@ from PySide6.QtWidgets import (QApplication, QComboBox, QGroupBox,
 from gui.all_pages_widget import All_pages
 from gui.main_menu_widget import Main_menu
 from gui.thread import Thread
+from gui.thread_for_loading import Thread_Loading
 from gui.img_processing import process_img
 
 
@@ -162,8 +163,19 @@ class MainWindow(QMainWindow):
             self.all_pages.emotions_page.updateMimic(self.current_mimic_data[0])
             
         except:
-            self.all_pages.heart_rate_variability_page.status_label.setText("Что-то пошло не так")
-            self.all_pages.emotions_page.status_label.setText("Что-то пошло не так")
+            try:
+                self.all_pages.video_capture_page.th = Thread_Loading()
+                self.all_pages.video_capture_page.th.finished.connect(self.recall_thread_data)
+
+                self.all_pages.video_capture_page.start_registration_button.setEnabled(False)
+                self.all_pages.video_capture_page.stop_registration_button.setEnabled(True)
+
+                self.all_pages.video_capture_page.th.setCurrentFileName(self.current_video_path)
+                self.all_pages.video_capture_page.th.start()
+
+            except:
+                self.all_pages.heart_rate_variability_page.status_label.setText("Что-то пошло не так")
+                self.all_pages.emotions_page.status_label.setText("Что-то пошло не так")
             
     def setPositionHRV(self, position):
         self.all_pages.heart_rate_variability_page.videoLabel.setPixmap(QPixmap.fromImage(process_img(self.current_video[position])))
