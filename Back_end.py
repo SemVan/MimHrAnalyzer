@@ -95,12 +95,15 @@ class App:
         plt.show()
 
         # Расчёт ЧСС
-        hr = vpg_analyzer.get_report_hr(self.__vpg_filt, self.fps)
-        print(f'Длинна сигнала: {len(self.vpg)}')
-        print(f'Длинна сигнала ЧСС: {len(hr)}')
-        print(f'ЧСС: {vpg_analyzer.get_hr_peak(self.__vpg_filt, self.fps)}')
-        print()
-        plt.plot(hr)
+        ans = vpg_analyzer.get_report_hr(self.__vpg_filt, self.fps)
+        #print(f'Длинна сигнала: {len(self.vpg)}')
+        #print(f'Длинна сигнала ЧСС: {len(ans["hr"])}')
+        #print(f'ЧСС: {vpg_analyzer.get_hr_peak(self.__vpg_filt, self.fps)}')
+        print('Сигнал уникальных ЧСС')
+        print(ans["hr_hist"])
+        fig, ax = plt.subplots(ncols=2)
+        ax[0].plot(ans["hr"])
+        ax[1].plot(ans["hr_hist"])
         plt.show()
 
         # Расчёт SDANN RMSSD NN50
@@ -108,10 +111,6 @@ class App:
         print(f'SDANN: {vpg_analyzer.sdann(peaks, self.fps)}')
         print(f'RMSSD: {vpg_analyzer.rmssd(peaks, self.fps)}')
         print(f'NN50: {vpg_analyzer.nn50(peaks, self.fps)}')
-
-        hrv = vpg_analyzer.get_report_hrv(self.__vpg_filt, self.fps, 100)
-        plt.plot(hrv['sdann'])
-        plt.show()
 
     def start(self):
         self._registrate()

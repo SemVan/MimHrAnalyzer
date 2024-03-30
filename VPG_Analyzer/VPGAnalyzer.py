@@ -250,7 +250,7 @@ class VPGAnalyzer(IVPGAnalyzer):
         hr = f[np.argmax(vpg_spec)] * 60
         return hr
 
-    def get_report_hr(self, vpg: list, fd: float) -> list:
+    def get_report_hr(self, vpg: list, fd: float) -> dict:
         """
         Метод расчёта кривой изменения ЧСС
         :param vpg: Отфильтрованный сигнал ВПГ
@@ -260,21 +260,39 @@ class VPGAnalyzer(IVPGAnalyzer):
         peak = self.find_peaks(vpg)
         # Проверка на достаточное колличество пиков
         if len(peak) < 2:
-            return [None for _ in range(len(vpg))]
+            ans = dict()
+            ans['hr'] = [None for _ in range(len(vpg))]
+            ans['hr_hist'] = []
+            return ans
 
         # Если в сигнале много пиков
         hr = [None for _ in range(peak[1])]
+        hr_unique = []
         a = 2
         b = 1
         c = 0
+        hr_unique.append(fd / (peak[b] - peak[c]) * 60)
         for i in range(peak[1], len(vpg)):
             if a < len(peak):
                 if i > peak[a]:
                     a += 1
                     b += 1
                     c += 1
-            hr.append(fd / (peak[b] - peak[c]) * 60)
-        return hr
+
+                    value = fd / (peak[b] - peak[c]) * 60
+                    if value > 200:
+                        value = np.mean(hr_unique)
+                    hr_unique.append(value)
+
+            value = fd / (peak[b] - peak[c]) * 60
+            if value > 200:
+                value = np.mean(hr_unique)
+
+            hr.append(value)
+        ans = dict()
+        ans['hr'] = hr
+        ans['hr_hist'] = hr_unique
+        return ans
 
     def get_report_hrv(self, vpg: list, fd: float, number: int, stride=1) -> dict:
         """
