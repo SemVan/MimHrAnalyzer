@@ -263,6 +263,7 @@ class VPGAnalyzer(IVPGAnalyzer):
             ans = dict()
             ans['hr'] = [None for _ in range(len(vpg))]
             ans['hr_hist'] = []
+            ans['rr'] = []
             return ans
 
         # Если в сигнале много пиков
@@ -292,6 +293,7 @@ class VPGAnalyzer(IVPGAnalyzer):
         ans = dict()
         ans['hr'] = hr
         ans['hr_hist'] = hr_unique
+        ans['rr'] = np.diff(peak) * (1 / fd)
         return ans
 
     def get_report_hrv(self, vpg: list, fd: float, number: int, stride=1) -> dict:
