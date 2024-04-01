@@ -269,6 +269,7 @@ class VPGAnalyzer(IVPGAnalyzer):
         # Если в сигнале много пиков
         hr = [None for _ in range(peak[1])]
         hr_unique = []
+        rr = []
         a = 2
         b = 1
         c = 0
@@ -284,16 +285,17 @@ class VPGAnalyzer(IVPGAnalyzer):
                     if value > 200:
                         value = np.mean(hr_unique)
                     hr_unique.append(value)
+                    rr.append(60 / value)
 
             value = fd / (peak[b] - peak[c]) * 60
             if value > 200:
                 value = np.mean(hr_unique)
-
             hr.append(value)
+
         ans = dict()
         ans['hr'] = hr
         ans['hr_hist'] = hr_unique
-        ans['rr'] = np.diff(peak) * (1 / fd)
+        ans['rr'] = rr
         return ans
 
     def get_report_hrv(self, vpg: list, fd: float, number: int, stride=1) -> dict:
