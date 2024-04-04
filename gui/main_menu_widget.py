@@ -27,13 +27,19 @@ class Main_menu(QWidget):
         self.video_button.setStyleSheet("font-family : ALS Sector;" 
                                         "font: bold;"
                                         "background-color : #006cdc;"  
-                                        "color : black;")
+                                        "color : black;"
+                                        "min-height: 2em;"
+                                        "border-radius: 5px")
         self.hrv_button.setStyleSheet("font-family : ALS Sector;"
                                       "font: bold;"
-                                      "background-color : #00b8ff;")
+                                      "background-color : #00b8ff;"
+                                        "min-height: 2em;"
+                                        "border-radius: 5px")
         self.emotions_button.setStyleSheet("font-family : ALS Sector;"
                                            "font: bold;"
-                                           "background-color : #00b8ff")
+                                           "background-color : #00b8ff;"
+                                        "min-height: 2em;"
+                                        "border-radius: 5px")
 
         
         self.horintal_layout.addWidget(self.video_button)

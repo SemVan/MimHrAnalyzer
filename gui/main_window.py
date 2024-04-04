@@ -47,7 +47,7 @@ class MainWindow(QMainWindow):
         #set stylish things
         self.setStyleSheet("background-color : white;")
         self.setWindowTitle("Анализ ВСР и мимики")
-        #self.setWindowIcon(QIcon('Resources/bmstu.png'))
+        self.setWindowIcon(QIcon('Resources/bmstu.png'))
         
         #init file dialog window
         self.dialog = QFileDialog(self)
@@ -99,13 +99,19 @@ class MainWindow(QMainWindow):
         self.main_menu.video_button.setStyleSheet("font-family : ALS Sector;"
                                                   "font: bold;"
                                                   "background-color : #006cdc;"
-                                                  "color : black")
+                                                  "color : black;"
+                                        "min-height: 2em;"
+                                        "border-radius: 5px")
         self.main_menu.hrv_button.setStyleSheet("font-family : ALS Sector;"
                                                 "font: bold;"
-                                                "background-color : #00b8ff")
+                                                "background-color : #00b8ff;"
+                                        "min-height: 2em;"
+                                        "border-radius: 5px")
         self.main_menu.emotions_button.setStyleSheet("font-family : ALS Sector;"
                                                      "font: bold;"
-                                                     "background-color : #00b8ff")
+                                                     "background-color : #00b8ff;"
+                                        "min-height: 2em;"
+                                        "border-radius: 5px")
      
     @Slot()
     def go_to_heart_rate_variability_page(self):
@@ -117,14 +123,20 @@ class MainWindow(QMainWindow):
         
         self.main_menu.video_button.setStyleSheet("font-family : ALS Sector;"
                                                   "font: bold;"
-                                                  "background-color : #00b8ff")
+                                                  "background-color : #00b8ff;"
+                                        "min-height: 2em;"
+                                        "border-radius: 5px")
         self.main_menu.hrv_button.setStyleSheet("font-family : ALS Sector;"
                                                 "font: bold;"
                                                 "background-color : #006cdc;"
-                                                "color : black")
+                                                "color : black;"
+                                        "min-height: 2em;"
+                                        "border-radius: 5px")
         self.main_menu.emotions_button.setStyleSheet("font-family : ALS Sector;"
                                                      "font: bold;"
-                                                     "background-color : #00b8ff")
+                                                     "background-color : #00b8ff;"
+                                        "min-height: 2em;"
+                                        "border-radius: 5px")
      
     @Slot()
     def go_to_emotions_page(self):
@@ -136,21 +148,33 @@ class MainWindow(QMainWindow):
         
         self.main_menu.video_button.setStyleSheet("font-family : ALS Sector;"
                                                   "font: bold;"
-                                                  "background-color : #00b8ff")
+                                                  "background-color : #00b8ff;"
+                                        "min-height: 2em;"
+                                        "border-radius: 5px")
         self.main_menu.hrv_button.setStyleSheet("font-family : ALS Sector;"
                                                 "font: bold;"
-                                                "background-color : #00b8ff")
+                                                "background-color : #00b8ff;"
+                                        "min-height: 2em;"
+                                        "border-radius: 5px")
         self.main_menu.emotions_button.setStyleSheet("font-family : ALS Sector;"
                                                      "font: bold;"
                                                      "background-color : #006cdc;"
-                                                     "color : black")
+                                                     "color : black;"
+                                        "min-height: 2em;"
+                                        "border-radius: 5px")
         
     @Slot()
     def open_video(self):
         
         filename, filter = self.dialog.getOpenFileName(caption='Open file', dir='.', filter='*.avi')
         if filename == '': return 0
-         
+
+        self.all_pages.video_capture_page.load_button.setEnabled(False)
+        self.all_pages.video_capture_page.start_registration_button.setEnabled(False)
+        self.all_pages.video_capture_page.start_registration_button.setEnabled(False)
+        self.all_pages.heart_rate_variability_page.loadButton.setEnabled(False)
+        self.all_pages.emotions_page.loadButton.setEnabled(False)
+  
         self.all_pages.heart_rate_variability_page.path_label.setText("Выбран файл " + filename.split("/")[-1].split(".")[0])
         self.all_pages.heart_rate_variability_page.status_label.setText("Видео загружается")
         
@@ -188,18 +212,24 @@ class MainWindow(QMainWindow):
             except:
                 self.all_pages.heart_rate_variability_page.status_label.setText("Что-то пошло не так")
                 self.all_pages.emotions_page.status_label.setText("Что-то пошло не так")
+
+                self.all_pages.video_capture_page.load_button.setEnabled(True)
+                self.all_pages.video_capture_page.start_registration_button.setEnabled(True)
+                self.all_pages.video_capture_page.stop_registration_button.setEnabled(False)
+                self.all_pages.heart_rate_variability_page.loadButton.setEnabled(True)
+                self.all_pages.emotions_page.loadButton.setEnabled(True)
             
     def setPositionHRV(self, position):
         self.all_pages.heart_rate_variability_page.videoLabel.setPixmap(QPixmap.fromImage(process_img(self.current_video[position])))
         self.all_pages.emotions_page.videoLabel.setPixmap(QPixmap.fromImage(process_img(self.current_video[position])))
-        self.all_pages.emotions_page.positionSlider.setSliderPosition(position)
+        #self.all_pages.emotions_page.positionSlider.setSliderPosition(position)
         self.all_pages.heart_rate_variability_page.updatePosition(position)
         self.all_pages.emotions_page.updateMimic(self.current_mimic_data[position])
         
     def setPositionEmo(self, position):
         self.all_pages.heart_rate_variability_page.videoLabel.setPixmap(QPixmap.fromImage(process_img(self.current_video[position])))
         self.all_pages.emotions_page.videoLabel.setPixmap(QPixmap.fromImage(process_img(self.current_video[position])))
-        self.all_pages.heart_rate_variability_page.positionSlider.setSliderPosition(position)
+        #self.all_pages.heart_rate_variability_page.positionSlider.setSliderPosition(position)
         self.all_pages.heart_rate_variability_page.updatePosition(position)
         self.all_pages.emotions_page.updateMimic(self.current_mimic_data[position])
     
@@ -236,6 +266,9 @@ class MainWindow(QMainWindow):
 
         self.all_pages.video_capture_page.start_registration_button.setEnabled(True)
         self.all_pages.video_capture_page.stop_registration_button.setEnabled(False)
+        self.all_pages.video_capture_page.load_button.setEnabled(True)
+        self.all_pages.heart_rate_variability_page.loadButton.setEnabled(True)
+        self.all_pages.emotions_page.loadButton.setEnabled(True)
         
     def tune_video_widgets(self):
         
@@ -257,9 +290,9 @@ class MainWindow(QMainWindow):
 
     def tune_graphs(self):
 
-        self.all_pages.heart_rate_variability_page.setHRPlot(self.current_hrv['hr'])
-        self.all_pages.heart_rate_variability_page.setSDANNPlot(self.current_hrv['sdann'])
-        self.all_pages.heart_rate_variability_page.setRMSSDPlot(self.current_hrv['rmssd'])
+        self.all_pages.heart_rate_variability_page.setHRPlot(self.current_hrv['hr']['hr'])
+        self.all_pages.heart_rate_variability_page.setSDANNPlot(self.current_hrv['hr']['hr_hist'])
+        self.all_pages.heart_rate_variability_page.setRMSSDPlot(self.current_hrv['hr']['rr'])
         self.all_pages.heart_rate_variability_page.updatePosition(0)
         
             

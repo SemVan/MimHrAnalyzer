@@ -85,29 +85,42 @@ class Heart_rate_variability_page(QWidget):
             self.sdann_frames,
             self.sdann_values,
             pen=self.blue_pen)
-        self.sdann_indicator = self.sdann_plot_widget.addLine(
-            x=self.sdann_indicator_position,
-            pen=self.green_pen)
+        # self.sdann_indicator = self.sdann_plot_widget.addLine(
+        #     x=self.sdann_indicator_position,
+        #     pen=self.green_pen)
         
         #init graph and lines for rmssd
         self.rmssd_plot_widget = pg.PlotWidget()
         self.rmssd_plot_widget.setBackground("w")
         self.rmssd_plot_widget.setTitle("График RMSSD от номера кадра", color="b", 
                                         size="12pt", family="ASL Sector")
-        self.rmssd_frames = []
-        self.rmssd_values = []
-        self.rmssd_indicator_position = 0
-        self.rmssd_line = self.rmssd_plot_widget.plot(
-            self.rmssd_frames,
-            self.rmssd_values,
-            pen=self.blue_pen)
-        self.rmssd_indicator = self.rmssd_plot_widget.addLine(
-            x=self.rmssd_indicator_position,
-            pen=self.green_pen)
+        
+        self.rmssd_line = pg.ScatterPlotItem(brush=pg.mkBrush(255, 255, 255, 120))
+        self.rmssd_frames = [0]
+        self.rmssd_values = [0]
+
+        self.rmssd_line.addPoints(self.rmssd_frames, self.rmssd_values)
+        self.rmssd_plot_widget.addItem(self.rmssd_line)
+
+        self.sdann_label = QLabel('SDANN: 0')
+        self.sdann_label.setStyleSheet("font-family : ALS Sector;" 
+                                 "color : black;")
+        self.sdann_label.setMinimumHeight(120)
+        self.sdann_label.setAlignment(Qt.AlignCenter)
+
+        self.rmssd_label = QLabel('RMSSD: 0')
+        self.rmssd_label.setStyleSheet("font-family : ALS Sector;" 
+                                 "color : black;")
+        self.rmssd_label.setMinimumHeight(120)
+        self.rmssd_label.setAlignment(Qt.AlignCenter)
+        self.bottom_right_layout = QHBoxLayout()
+        self.bottom_right_layout.addWidget(self.sdann_label)
+        self.bottom_right_layout.addWidget(self.rmssd_label)
         
         self.right_vertical_layout.addWidget(self.hr_plot_widget)
         self.right_vertical_layout.addWidget(self.sdann_plot_widget)
         self.right_vertical_layout.addWidget(self.rmssd_plot_widget)
+        self.right_vertical_layout.addLayout(self.bottom_right_layout)
         
         self.horizontal_layout = QHBoxLayout()
         
@@ -131,8 +144,8 @@ class Heart_rate_variability_page(QWidget):
         self.position = position
 
         self.hr_indicator.setValue(self.position)
-        self.sdann_indicator.setValue(self.position)
-        self.rmssd_indicator.setValue(self.position)
+        # self.sdann_indicator.setValue(self.position)
+        #self.rmssd_indicator.setValue(self.position)
         
     def setHRPlot(self, hr_vals):
         frames, vals = self.process_raw_data(hr_vals)
@@ -143,19 +156,21 @@ class Heart_rate_variability_page(QWidget):
         self.hr_line.setData(self.hr_frames, self.hr_values)
 
     def setSDANNPlot(self, sdann_vals):
-        frames, vals = self.process_raw_data(sdann_vals)
+        frames, vals = self.hist_line(sdann_vals)
 
         self.sdann_frames = frames
         self.sdann_values = vals
         self.sdann_plot_widget.setXRange(self.sdann_frames[0], self.sdann_frames[-1])
+        self.sdann_plot_widget.setYRange(0, np.max(vals)+1)
         self.sdann_line.setData(self.sdann_frames, self.sdann_values)
 
     def setRMSSDPlot(self, rmssd_vals):
-        frames, vals = self.process_raw_data(rmssd_vals)
+        frames, vals = self.process_rr(rmssd_vals)
 
         self.rmssd_frames = frames
         self.rmssd_values = vals
-        self.rmssd_plot_widget.setXRange(self.rmssd_frames[0], self.rmssd_frames[-1])
+        self.rmssd_plot_widget.setXRange(0, 3)
+        self.rmssd_plot_widget.setYRange(0, 3)
         self.rmssd_line.setData(self.rmssd_frames, self.rmssd_values)
         
     def updateHRIndicator(self, position):
@@ -163,8 +178,11 @@ class Heart_rate_variability_page(QWidget):
         self.hr_indicator.setValue(self.hr_indicator_position)
 
     def updateSDANNIndicator(self, position):
-        self.sdann_indicator_position = position
-        self.sdann_indicator.setValue(self.sdann_indicator_position)
+        try:
+            self.sdann_indicator_position = position
+            self.sdann_indicator.setValue(self.sdann_indicator_position)
+        except:
+            pass
 
     def updateRMSSDIndicator(self, position):
         self.hr_indicator_position = position
@@ -182,8 +200,44 @@ class Heart_rate_variability_page(QWidget):
         frames = np.arange(first_not_none_element, len(raw_values))
         vals = raw_values[first_not_none_element:]
 
-        return frames, vals
+        new_frames = np.linspace(frames[0], frames[-1], len(frames)*1)
+        new_vals = np.interp(new_frames, frames, vals)
 
+        return new_frames, new_vals
+
+    def hist_line(self, data):
+
+        hist, ticks = np.histogram(data)
+
+        dticks = ticks[1] - ticks[0]
+        ticks -= dticks/2
+
+        hist_line = [-1000]
+        new_ticks = [ticks[0]]
+
+        for i in range(len(hist)):
+
+            hist_line.append(hist[i])
+            hist_line.append(hist[i])
+            hist_line.append(-1000)
+
+            new_ticks.append(ticks[i])
+            new_ticks.append(ticks[i] + dticks)
+            new_ticks.append(ticks[i] + dticks)
+
+
+        return new_ticks, hist_line
+    
+    def process_rr(self, rr):
+
+        rr1 = []
+        rr2 = []
+
+        for i in range(1, len(rr), 2):
+            rr1.append(rr[i-1])
+            rr2.append(rr[i])
+
+        return rr1, rr2
         
  
 if __name__ == "__main__":
