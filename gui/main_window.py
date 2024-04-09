@@ -293,6 +293,8 @@ class MainWindow(QMainWindow):
         self.all_pages.heart_rate_variability_page.setHRPlot(self.current_hrv['hr']['hr'])
         self.all_pages.heart_rate_variability_page.setSDANNPlot(self.current_hrv['hr']['hr_hist'])
         self.all_pages.heart_rate_variability_page.setRMSSDPlot(self.current_hrv['hr']['rr'])
+        self.all_pages.heart_rate_variability_page.sdann_label.setText(f'SDANN: {self.current_hrv["hr"]["sdann"]}')
+        self.all_pages.heart_rate_variability_page.rmssd_label.setText(f'RMSSD: {self.current_hrv["hr"]["rmmsd"]}')
         self.all_pages.heart_rate_variability_page.updatePosition(0)
         
             

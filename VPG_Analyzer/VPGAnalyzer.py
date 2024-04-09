@@ -296,6 +296,15 @@ class VPGAnalyzer(IVPGAnalyzer):
         ans['hr'] = hr
         ans['hr_hist'] = hr_unique
         ans['rr'] = rr
+        ans['sdann'] = np.std(rr)
+
+        s = 0
+        for i in rr:
+            s += i ** 2
+        if len(rr) == 0:
+            ans['rmssd'] = None
+        else:
+            ans['rmmsd'] = np.sqrt(s / len(rr)) * (1 / fd)
         return ans
 
     def get_report_hrv(self, vpg: list, fd: float, number: int, stride=1) -> dict:
