@@ -6,3 +6,8 @@ issue with dlib can be caused by abscence of visual studio with c++ modules: htt
 # Test
 To run the program, run main_gui.py  
 
+# Build
+python build_exe_openface.py
+
+В корне проекта нужно распаковать архив с папкой model:
+https://disk.yandex.ru/d/c8fFS5kvk_b1bA

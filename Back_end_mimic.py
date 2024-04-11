@@ -3,9 +3,9 @@ import os
 
 import cv2
 
-from Frame_handler.FrameHandlerMimic import FrameHandlerMimic
-from Mimic_Analyzer.MimicAnalyzer import MimicAnalyzer
-
+from Frame_handler_Mimic.FrameHandlerMimic import FrameHandlerMimic
+# from Mimic_Analyzer.MimicAnalyzer import MimicAnalyzer
+from Mimic_Analyzer.MimicAnalyzerOpenface import MimicAnalyzer
 
 class App:
     def __init__(self, path='Data'):

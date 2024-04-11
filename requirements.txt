@@ -1,10 +1,11 @@
 numpy
 opencv-python
-dlib
-scipy
+scipy==1.12.0
 matplotlib
 mediapipe
 onnxruntime
 pandas
 pyside6
 pyqtgraph
+pyinstaller==5.13.2
+dlib==19.24.2

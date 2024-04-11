@@ -35,7 +35,7 @@ class Heart_rate_variability_page(QWidget):
         self.path_label = QLabel("Видео не выбрано")
         self.path_label.setStyleSheet("font-family : ALS Sector;" 
                                       "color : black;")
-        self.status_label = QLabel("Для продолжения работы запишите или выберите ввидео")
+        self.status_label = QLabel("Для продолжения работы запишите или выберите видео")
         self.status_label.setStyleSheet("font-family : ALS Sector;" 
                                       "color : black;")
         

@@ -14,7 +14,8 @@ class VPGGenerator(IVPGGenerator):
         if len(predictor_path) == 0:
             predictor_path = 'shape_predictor_68_face_landmarks.dat'
         if len(cascade_path) == 0:
-            cascade_path = cv2.data.haarcascades + 'haarcascade_frontalface_alt.xml'
+            # cascade_path = cv2.data.haarcascades + 'haarcascade_frontalface_alt.xml'
+            cascade_path = 'haarcascade_frontalface_alt.xml'
         self.__predictor = dlib.shape_predictor(predictor_path)
         self.__cascade = cv2.CascadeClassifier(cascade_path)
 

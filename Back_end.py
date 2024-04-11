@@ -4,7 +4,7 @@ import cv2
 import matplotlib.pyplot as plt
 import numpy as np
 
-from Frame_handler.FrameHandlerVPG import FrameHandlerVPG
+from Frame_handler_VPG.FrameHandlerVPG import FrameHandlerVPG
 from VPG_Analyzer.VPGAnalyzer import VPGAnalyzer
 
 

@@ -360,7 +360,11 @@ class MimicAnalyzer(IMimicAnalyzer):
             None,
             {'feature': pred},
         )[0]
-        pred_au_intensity = np.squeeze(pred_au_intensity, axis=0).astype(float).tolist()
+        # pred_au_intensity = np.squeeze(pred_au_intensity, axis=0).astype(float).tolist()
+        pred_au_intensity = np.squeeze(pred_au_intensity, axis=0).astype(float)
+        # pred_au_intensity = np.clip(pred_au_intensity * 5, 0, 5).tolist()
+        # pred_au_intensity = np.clip(pred_au_intensity * 5, 0, 1).tolist()
+        pred_au_intensity = np.clip(pred_au_intensity * 2, 0, 1).tolist()
 
         # AU presence
         pred_au_presence = self.ort_session_au_presence.run(
@@ -368,6 +372,7 @@ class MimicAnalyzer(IMimicAnalyzer):
             {'feature': pred},
         )[0]
         pred_au_presence = np.squeeze(pred_au_presence, axis=0)
+        # pred_au_presence = np.clip(pred_au_presence * 5, 0, 1)
         pred_au_presence = (pred_au_presence > 0.5).astype(bool).tolist()
 
         # expression
@@ -377,16 +382,22 @@ class MimicAnalyzer(IMimicAnalyzer):
         )[0]
         pred_expression = np.squeeze(pred_expression, axis=0).astype(float).tolist()
 
+        # print(pred_expression, flush=True)
+
         pred_expression_max = np.max(pred_expression)
-        pred_expression_exp = [np.exp(el - pred_expression_max) for el in pred_expression]
+        # pred_expression_exp = [np.exp(el - pred_expression_max) for el in pred_expression]
+        pred_expression_exp = [np.exp(el - pred_expression_max) if el>=0.01 else 0. for el in pred_expression]
+
+
         pred_expression_sum = np.sum(pred_expression_exp)
-        pred_expression_normalized = [el / pred_expression_sum for el in pred_expression_exp]
+        # pred_expression_normalized = [el / pred_expression_sum for el in pred_expression_exp]
+        pred_expression_normalized = [el / pred_expression_sum if el!=0. else 0. for el in pred_expression_exp]
 
         mimic_results = {}
         mimic_results['pred_au_intensity'] = pred_au_intensity
         mimic_results['pred_au_presence'] = pred_au_presence
-        # mimic_results['pred_expression'] = pred_expression_normalized
-        mimic_results['pred_expression'] = pred_expression
+        mimic_results['pred_expression'] = pred_expression_normalized
+        # mimic_results['pred_expression'] = pred_expression
 
         return mimic_results
 
