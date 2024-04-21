@@ -7,7 +7,7 @@ from PySide6.QtGui import QImage
 
 from gui.img_processing import process_img
 from Frame_handler_VPG.FrameHandlerVPG import FrameHandlerVPG
-from Frame_handler_Mimic.FrameHandlerMimic import FrameHandlerMimic
+from Frame_handler.FrameHandlerMimic import FrameHandlerMimic
 from vpg_analyzer_for_gui import vpg_analyzer
 
 class Thread(QThread):

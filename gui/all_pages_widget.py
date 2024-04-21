@@ -10,8 +10,7 @@ from PySide6.QtWidgets import (QApplication, QComboBox, QGroupBox,
 
 from gui.video_capture_widget import Video_capture_page
 from gui.heart_rate_variability_widget import Heart_rate_variability_page     
-# from gui.emotions_widget import Emotions_page
-from gui.emotions_widget_openface import Emotions_page
+from gui.emotions_widget import Emotions_page
 
 class All_pages(QStackedWidget):
     
