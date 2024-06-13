@@ -23,8 +23,8 @@ class Thread_Loading(QThread):
         self.video = []
 
         self.THRESHOLD_AREA = 25      # Порог изменения площади в процентах!!!!!!!
-        self.THRESHOLD_INTENSITY_MAX = 765
-        self.THRESHOLD_INTENSITY_MIN = 0
+        self.THRESHOLD_INTENSITY_MAX = 500
+        self.THRESHOLD_INTENSITY_MIN = 90
 
     #thread main process
     def run(self):
