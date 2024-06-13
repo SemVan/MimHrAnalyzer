@@ -7,3 +7,4 @@ vpg.json
 mimic.json
 /model
 __pycache__
+**/__pycache__

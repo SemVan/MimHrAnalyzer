@@ -1,5 +1,6 @@
 import numpy as np
 from scipy.signal import butter, sosfilt, medfilt
+from scipy import ndimage
 from numpy.fft import rfft, rfftfreq
 from scipy.signal import find_peaks_cwt
 
@@ -268,29 +269,51 @@ class VPGAnalyzer(IVPGAnalyzer):
 
         # Если в сигнале много пиков
         hr = [None for _ in range(peak[1])]
-        hr_unique = []
-        rr = []
-        a = 2
-        b = 1
-        c = 0
-        hr_unique.append(fd / (peak[b] - peak[c]) * 60)
-        for i in range(peak[1], len(vpg)):
-            if a < len(peak):
-                if i > peak[a]:
-                    a += 1
-                    b += 1
-                    c += 1
 
-                    value = fd / (peak[b] - peak[c]) * 60
-                    if value > 200:
-                        value = np.mean(hr_unique)
-                    hr_unique.append(value)
-                    rr.append(60 / value)
+        my_hr = fd / np.diff(peak) * 60
+        mean_my_hr = np.mean(my_hr)
+        for i in range(len(my_hr)):
+            if my_hr[i] > 180:
+                my_hr[i] = mean_my_hr
+            elif my_hr[i] <= 45:
+                my_hr[i] = mean_my_hr
 
-            value = fd / (peak[b] - peak[c]) * 60
-            if value > 200:
-                value = np.mean(hr_unique)
-            hr.append(value)
+        # print("ОТЛАДКА")
+        # print(len(my_hr))
+        my_hr = ndimage.median_filter(my_hr, size=7)
+        # print(len(my_hr))
+
+        for i in range(2, len(peak)):
+            for _ in range(peak[i] - peak[i-1]):
+                hr.append(my_hr[i-2])
+        for _ in range(len(vpg) - len(hr)):
+            hr.append(my_hr[-1])
+
+        # hr_unique = []
+        # rr = []
+        # a = 2
+        # b = 1
+        # c = 0
+        # hr_unique.append(fd / (peak[b] - peak[c]) * 60)
+        # for i in range(peak[1], len(vpg)):
+        #     if a < len(peak):
+        #         if i > peak[a]:
+        #             a += 1
+        #             b += 1
+        #             c += 1
+        #
+        #             value = fd / (peak[b] - peak[c]) * 60
+        #             if value > 200:
+        #                 value = np.mean(hr_unique)
+        #             hr_unique.append(value)
+        #             rr.append(60 / value)
+        #
+        #     value = fd / (peak[b] - peak[c]) * 60
+        #     if value > 200:
+        #         value = np.mean(hr_unique)
+        #     #hr.append(value)
+        hr_unique = list(my_hr)
+        rr = list(60 / my_hr)
 
         ans = dict()
         ans['hr'] = hr
