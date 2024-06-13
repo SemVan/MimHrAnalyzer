@@ -25,7 +25,7 @@ class Thread(QThread):
         self.fps = 0
         self.video = []
 
-        self.THRESHOLD_AREA = 10  # Порог изменения площади в процентах!!!!!!!
+        self.THRESHOLD_AREA = 25  # Порог изменения площади в процентах!!!!!!!
         self.THRESHOLD_INTENSITY_MAX = 765
         self.THRESHOLD_INTENSITY_MIN = 0
 
