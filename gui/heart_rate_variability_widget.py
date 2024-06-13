@@ -124,7 +124,7 @@ class Heart_rate_variability_page(QWidget):
         #init graph and lines for sdann
         self.sdann_plot_widget = pg.PlotWidget()
         self.sdann_plot_widget.setBackground("w")
-        self.sdann_plot_widget.setTitle("Гистограмма SDANN от номера кадра", color="b", 
+        self.sdann_plot_widget.setTitle("Гистограмма SDANN", color="b", 
                                         size="12pt", family="ASL Sector")
         self.sdann_frames = []
         self.sdann_values = []
@@ -140,7 +140,7 @@ class Heart_rate_variability_page(QWidget):
         #init graph and lines for rmssd
         self.rmssd_plot_widget = pg.PlotWidget()
         self.rmssd_plot_widget.setBackground("w")
-        self.rmssd_plot_widget.setTitle("Скатерограмма RMSSD от номера кадра", color="b", 
+        self.rmssd_plot_widget.setTitle("Скатерограмма RMSSD", color="b", 
                                         size="12pt", family="ASL Sector")
         
         self.rmssd_line = pg.ScatterPlotItem(brush=pg.mkBrush(255, 255, 255, 120))
