@@ -25,6 +25,8 @@ class FrameHandlerVPG(IFrameHandler):
         """
         vpg_generator = VPGGenerator()
         vpg = []
+        rectangles = []
+        intensity = []
         while True:
             # Если в очереди нет кадров продолжи ожидать
             if queue.empty():
@@ -37,11 +39,21 @@ class FrameHandlerVPG(IFrameHandler):
                 break
 
             value = vpg_generator.get_vpg_discret(frame)
+            face, rectangle = vpg_generator.detect_face(frame)
+            if len(rectangle) == 0:
+                rectangle = None
+                inten = None
+            else:
+                rectangle = float((rectangle[0] - rectangle[2]) * (rectangle[1] - rectangle[3]))
+                inten = float(np.sum(face)) / rectangle
+
             # value = vpg_generator.get_vpg_discret_without_face(frame)
             vpg.append(value)
+            rectangles.append(rectangle)
+            intensity.append(inten)
 
         with open(path, 'w') as file:
-            json.dump(vpg, file)
+            json.dump([vpg, rectangles, intensity], file)
 
     def start(self):
         """
@@ -70,11 +82,11 @@ class FrameHandlerVPG(IFrameHandler):
         :return: Массив ВПГ (Не фильтрованный)
         """
         self.__process.join(timeout=timeout)
-        vpg = []
+        result = []
         # Получение сигнала ВПГ
         with open(self.__path, 'r') as file:
-            vpg = json.load(file)
-        return vpg
+            result = json.load(file)
+        return result
 
     def is_alive(self) -> bool:
         """

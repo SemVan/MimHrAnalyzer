@@ -13,6 +13,23 @@ from PySide6.QtWidgets import (QApplication, QComboBox, QGroupBox, QSlider,
 
 from gui.img_processing import process_img
 
+green_stylesheet = """
+       border-radius: 6px;
+       min-height: 12px;
+       max-height: 12px;
+       min-width: 12px;
+       max-width: 12px;
+       background-color: green;
+   """
+red_stylesheet = """
+       border-radius: 6px;
+       min-height: 12px;
+       max-height: 12px;
+       min-width: 12px;
+       max-width: 12px;
+       background-color: red;
+   """
+
 class Heart_rate_variability_page(QWidget):
     
     def __init__(self):
@@ -26,10 +43,38 @@ class Heart_rate_variability_page(QWidget):
         self.videoLabel.setFixedSize(640, 480)
         self.videoLabel.setPixmap(QPixmap.fromImage(self.placeholder))
         self.videoLabel.setAlignment(Qt.AlignCenter)
-        
+
         #position slider
         self.positionSlider = QSlider(Qt.Horizontal)
         self.positionSlider.setEnabled(False)
+
+        #indicators layouts
+        self.lumin_ind = QHBoxLayout()
+        self.lumin_text = QLabel("Освещенность лица")
+        self.lumin_text.setStyleSheet("font-family : ALS Sector;" 
+                                      "color : black;")
+        self.lumin_led = QLabel()
+        self.lumin_led.setStyleSheet(green_stylesheet)
+        self.lumin_ind.addWidget(self.lumin_text)
+        self.lumin_ind.addWidget(self.lumin_led)
+
+        self.face_ind = QHBoxLayout()
+        self.face_text = QLabel("Положение лица")
+        self.face_text.setStyleSheet("font-family : ALS Sector;" 
+                                      "color : black;")
+        self.face_led = QLabel()
+        self.face_led.setStyleSheet(green_stylesheet)
+        self.face_ind.addWidget(self.face_text)
+        self.face_ind.addWidget(self.face_led)
+
+        self.pos_ind = QHBoxLayout()
+        self.pos_text = QLabel("Динамика движений")
+        self.pos_text.setStyleSheet("font-family : ALS Sector;" 
+                                      "color : black;")
+        self.pos_led = QLabel()
+        self.pos_led.setStyleSheet(green_stylesheet)
+        self.pos_ind.addWidget(self.pos_text)
+        self.pos_ind.addWidget(self.pos_led)
         
         #info labels
         self.path_label = QLabel("Видео не выбрано")
@@ -47,6 +92,9 @@ class Heart_rate_variability_page(QWidget):
         #build left vertical layout
         self.left_vertical_layout.addWidget(self.videoLabel)
         self.left_vertical_layout.addWidget(self.positionSlider)
+        self.left_vertical_layout.addLayout(self.lumin_ind)
+        self.left_vertical_layout.addLayout(self.face_ind)
+        self.left_vertical_layout.addLayout(self.pos_ind)
         self.left_vertical_layout.addWidget(self.path_label)
         self.left_vertical_layout.addWidget(self.status_label)
         self.left_vertical_layout.addWidget(self.loadButton)
@@ -238,6 +286,23 @@ class Heart_rate_variability_page(QWidget):
             rr2.append(rr[i])
 
         return rr1, rr2
+    
+    def change_leds(self, lum, face, pos):
+
+        if lum: 
+            self.lumin_led.setStyleSheet(green_stylesheet)
+        else:
+            self.lumin_led.setStyleSheet(red_stylesheet)
+
+        if face: 
+            self.face_led.setStyleSheet(green_stylesheet)
+        else:
+            self.face_led.setStyleSheet(red_stylesheet)
+
+        if pos: 
+            self.pos_led.setStyleSheet(green_stylesheet)
+        else:
+            self.pos_led.setStyleSheet(red_stylesheet)
         
  
 if __name__ == "__main__":

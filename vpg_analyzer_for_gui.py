@@ -5,13 +5,17 @@ import json
 def vpg_analyzer(vpg, fps, path):
     vpg_analyzer = VPGAnalyzer()
 
-        # Избавление от кадров без лица
+    face_flags = []
+    # Избавление от кадров без лица
     for i in range(len(vpg)):
         if vpg[i] is None:
             if i == 0:
                 vpg[i] = 0
             else:
                 vpg[i] = vpg[i - 1]
+            face_flags.append(False)
+        else:
+            face_flags.append(True)
 
     # Нормолизуем сигнал
     vpg = (vpg - np.mean(vpg)) / np.std(vpg)
@@ -27,6 +31,7 @@ def vpg_analyzer(vpg, fps, path):
 
     hrv = vpg_analyzer.get_report_hrv(vpg_filt, fps, 100)
     hrv['hr'] = hr
+    hrv['face'] = face_flags
 
     with open(path, 'w') as file:
         json.dump(hrv, file)

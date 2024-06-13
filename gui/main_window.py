@@ -230,6 +230,12 @@ class MainWindow(QMainWindow):
         self.all_pages.emotions_page.videoLabel.setPixmap(QPixmap.fromImage(process_img(self.current_video[position])))
         #self.all_pages.emotions_page.positionSlider.setSliderPosition(position)
         self.all_pages.heart_rate_variability_page.updatePosition(position)
+        self.all_pages.heart_rate_variability_page.change_leds(self.current_hrv['lum'][position], 
+                                                               self.current_hrv['face'][position], 
+                                                               self.current_hrv['area'][position])
+        self.all_pages.emotions_page.change_leds(self.current_hrv['lum'][position], 
+                                                               self.current_hrv['face'][position], 
+                                                               self.current_hrv['area'][position])
         self.all_pages.emotions_page.updateMimic(self.current_mimic_data[position])
         
     def setPositionEmo(self, position):
@@ -237,6 +243,12 @@ class MainWindow(QMainWindow):
         self.all_pages.emotions_page.videoLabel.setPixmap(QPixmap.fromImage(process_img(self.current_video[position])))
         #self.all_pages.heart_rate_variability_page.positionSlider.setSliderPosition(position)
         self.all_pages.heart_rate_variability_page.updatePosition(position)
+        self.all_pages.heart_rate_variability_page.change_leds(self.current_hrv['lum'][position], 
+                                                               self.current_hrv['face'][position], 
+                                                               self.current_hrv['area'][position])
+        self.all_pages.emotions_page.change_leds(self.current_hrv['lum'][position], 
+                                                               self.current_hrv['face'][position], 
+                                                               self.current_hrv['area'][position])
         self.all_pages.emotions_page.updateMimic(self.current_mimic_data[position])
     
     @Slot()
@@ -288,11 +300,17 @@ class MainWindow(QMainWindow):
         self.all_pages.heart_rate_variability_page.positionSlider.setMaximum(len(self.current_video)-1)
         self.all_pages.heart_rate_variability_page.positionSlider.setSliderPosition(0)
         self.all_pages.heart_rate_variability_page.positionSlider.setEnabled(True)
+        self.all_pages.heart_rate_variability_page.change_leds(self.current_hrv['lum'][0], 
+                                                               self.current_hrv['face'][0], 
+                                                               self.current_hrv['area'][0])
         
         self.all_pages.emotions_page.positionSlider.setMinimum(0)
         self.all_pages.emotions_page.positionSlider.setMaximum(len(self.current_video)-1)
         self.all_pages.emotions_page.positionSlider.setSliderPosition(0)
         self.all_pages.emotions_page.positionSlider.setEnabled(True)
+        self.all_pages.emotions_page.change_leds(self.current_hrv['lum'][0], 
+                                                               self.current_hrv['face'][0], 
+                                                               self.current_hrv['area'][0])
 
     def tune_graphs(self):
 
