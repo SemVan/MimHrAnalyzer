@@ -274,17 +274,18 @@ class VPGAnalyzer(IVPGAnalyzer):
         mean_my_hr = np.mean(my_hr)
         for i in range(len(my_hr)):
             if my_hr[i] > 180:
-                my_hr[i] = mean_my_hr
+                my_hr[i] = 180
             elif my_hr[i] <= 45:
-                my_hr[i] = mean_my_hr
+                my_hr[i] = 45
 
         # print("ОТЛАДКА")
         # print(len(my_hr))
         my_hr = ndimage.median_filter(my_hr, size=7)
         mean_my_hr = np.mean(my_hr)
+        med_my_hr = np.median(my_hr)
         for i in range(len(my_hr)):
-            if (np.abs(my_hr[i] - mean_my_hr) / mean_my_hr) > 0.2:
-                my_hr[i] = mean_my_hr
+            if (np.abs(my_hr[i] - mean_my_hr) / mean_my_hr) > 0.10:
+                my_hr[i] = med_my_hr
         # print(len(my_hr))
 
         for i in range(2, len(peak)):
